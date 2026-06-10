@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Shell.qml</file>
+        <file>TopBar.qml</file>
+        <file>Theme.qml</file>
+        <file>components/TopBarIcon.qml</file>
+        <file>components/StatusIndicator.qml</file>
+        <file>components/AppDrawer.qml</file>
+        <file>components/AppDrawerItem.qml</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>icons/drawer.svg</file>
+        <file>icons/calendar.svg</file>
+        <file>icons/wifi.svg</file>
+        <file>icons/battery.svg</file>
+        <file>icons/touch.svg</file>
+        <file>icons/notification.svg</file>
+    </qresource>
+</RCC>

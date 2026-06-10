@@ -1,0 +1,163 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #0a0a0a;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.homepage-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Hero Typography Panel */
+.hero-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+#live-clock {
+    font-size: 4.5rem;
+    font-weight: 200;
+    letter-spacing: -2px;
+    color: #ffffff;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+#user-greeting {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #666666;
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Layout Grid Mechanics */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.card {
+    background-color: #141414;
+    border: 1px solid #222222;
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 220px;
+}
+
+.card h3 {
+    font-size: 0.85rem;
+    color: #888888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #222222;
+    padding-bottom: 10px;
+}
+
+/* App Button Component Framework */
+.launcher-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.app-card {
+    background-color: #1f1f1f;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.app-card:hover {
+    background-color: #262626;
+    border-color: #007acc;
+    transform: translateY(-2px);
+}
+
+.app-card .icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.app-card .label {
+    font-size: 0.9rem;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+/* Active Asynchronous Telemetry Monitors */
+.empty-state {
+    color: #444444;
+    font-style: italic;
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.95rem;
+}
+
+.task-box {
+    background-color: #1f1f1f;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 10px;
+}
+
+.task-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+#task-title { font-weight: bold; color: #ffffff; }
+#task-id { color: #888888; font-family: monospace; }
+
+.progress-track {
+    background-color: #111111;
+    height: 8px;
+    border-radius: 4px;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    background-color: #007acc;
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    transition: width 0.3s ease-out; /* Smooth progress bar transitions */
+}
+
+.task-status-row {
+    font-size: 0.8rem;
+    color: #ffeb3b;
+    font-weight: bold;
+}
+
+.hidden { display: none !important; }
