@@ -19,9 +19,26 @@ function initializeWebOSIPCBridge() {
             sysContext.nativeJobFinished.connect(function(jobId, success, message) {
                 logSystemEvent(`Background worker completed: Job [${jobId}] Success: ${success}. Info: ${message}`);
             });
+            
+            // Query host sysfs zRAM configuration settings
+            loadZramMetricsFromHost();
         });
     } else {
         logSystemEvent("Standalone Mode: QWebChannel not present. Running offline simulations.");
+    }
+}
+
+function loadZramMetricsFromHost() {
+    if (window.sysContext) {
+        sysContext.getZramDiskSize(function(size) {
+            document.getElementById("zram-size-val").textContent = size;
+        });
+        sysContext.getZramAlgorithm(function(algo) {
+            document.getElementById("zram-algo-val").textContent = algo.trim();
+        });
+        sysContext.getSystemSwappiness(function(swappiness) {
+            document.getElementById("swappiness-val").textContent = swappiness;
+        });
     }
 }
 
@@ -132,18 +149,13 @@ function startSimulatedModemTelemetry() {
     }, 25000);
 }
 
-// Fluctuate CPU metrics and zRAM compression logs
+// Fluctuate CPU metrics
 function startSystemMetricsSimulation() {
     const cpuDisplay = document.getElementById("cpu-load");
-    const zramDisplay = document.getElementById("zram-usage");
     
     setInterval(function() {
         // CPU load fluctuations
         const load = 5 + Math.floor(Math.random() * 20);
         cpuDisplay.textContent = `${load}% Load`;
-
-        // zRAM usage fluctuates slowly
-        const zramPct = 30 + Math.floor(Math.random() * 8);
-        zramDisplay.textContent = `zstd (${zramPct}% Used)`;
     }, 4000);
 }

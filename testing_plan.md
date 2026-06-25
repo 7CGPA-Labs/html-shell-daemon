@@ -1,6 +1,6 @@
-# Verification & Testing Plan - Project WebOS Appliance
+# Unified Verification & Testing Plan - Project WebOS Appliance
 
-This document provides step-by-step instructions to compile and verify all features implemented across Milestones 1 and 2. Testing is divided into the **Appliance Shell (Hard Layer)**, **Web PWAs (Soft Layer)**, and **OS Foundation Scripts**.
+This document provides complete instructions to compile, verify, and dry-run test the features implemented in Milestones 1 and 2, including the ZRAM metrics query integration.
 
 ---
 
@@ -64,12 +64,12 @@ With the shell running, verify the tab-switching UX:
 - **Result**: Spawns a new tab labeled "Gemini: [Query]" and redirects the viewport to the Google Gemini interface. Verify that you can click the `×` button on the tab to close it.
 
 ### 3. Zero-Trust Local SVG Icons
-- **Action**: Navigate to `web-apps/web-awesome/test-svg.html` by typing `web-awesome/test-svg.html` inside the Spotlight Search (or opening it inside a standard browser).
+- **Action**: Navigate to `web-apps/web-awesome/test-svg.html` by typing `web-awesome/test-svg.html` inside the Spotlight Search.
 - **Result**: Confirm that the grid renders all 7 packaged offline SVGs (Drawer, Calendar, WiFi, Battery, Gear, Folder, Terminal) without hitting external networks.
 
 ---
 
-## 🔌 Phase 3: Telephony & Asynchronous C++ Bridge Telemetry
+## 🔌 Phase 3: Telephony, System Metrics & C++ Bridge Telemetry
 
 ### 1. Asynchronous I/O Thread Pool (File Viewer)
 - **Action**: Switch to the **Files** PWA tab and click **Backup Files to USB**.
@@ -79,14 +79,18 @@ With the shell running, verify the tab-switching UX:
   3. The File PWA footer displays a yellow progress percentage tracking the copy worker increments.
   4. Once complete, the TopBar updates to `Backup Complete` (fading out after 4 seconds) and the PWA footer turns green with success notifications.
 
-### 2. Hardware slider sysfs & oFono bindings (Settings)
-- **Action**: Switch to the **Settings** PWA tab.
+### 2. Real Host ZRAM & Swappiness Telemetry (Settings)
+- **Action**: Open the **Settings** PWA tab while running on Lubuntu (after setting up zRAM).
+- **Result**: Verify the bottom "oFono Telephony Engine & System Metrics" grid:
+  - **zRAM Size**: Displays the actual capacity in MB read from `/sys/block/zram0/disksize` (e.g. `1536 MB` or `2048 MB`).
+  - **zRAM Engine**: Displays the active algorithm engine from `/sys/block/zram0/comp_algorithm` (e.g. `zstd` or `lzo-rle`).
+  - **Swappiness**: Displays the current kernel swappiness from `/proc/sys/vm/swappiness` (should be `150` if zram script has executed).
+
+### 3. Hardware sliders & oFono Bindings
 - **Action**: Move the **Screen Brightness** and **Volume** sliders.
-- **Result**: The local settings log logs `Sysfs Brightness output -> /sys/class/backlight/brightness set to: X%` and the C++ terminal outputs the matching IPC request logs.
-- **Action**: Toggle Mobile Data or change Preferred Network Type.
-- **Result**: Verify the settings log appends these changes and that the C++ console captures them.
-- **Action**: Watch the "SMS & Signal Telemetry Log" at the bottom.
-- **Result**: Confirm that CPU and zRAM usage fluctuate every 4 seconds, and mock D-Bus cellular notifications/incoming SMS texts appear every 25 seconds.
+- **Result**: The settings log displays `/sys/class/backlight/brightness set to: X%` and master volume set to `Y%`.
+- **Action**: Watch the logs at the bottom.
+- **Result**: Verify CPU load fluctuates every 4 seconds, and mock D-Bus telephony carrier events and SMS logs print every 25 seconds.
 
 ---
 
@@ -100,10 +104,10 @@ Run the script to check if the zRAM configurations map correctly to memory space
 # Syntax Check
 bash -n scripts/setup-zram.sh
 
-# Dry Run execution (checks load capacity without swapon locks)
-sudo bash -c "modprobe zram num_devices=1 && echo zstd > /sys/block/zram0/comp_algorithm && echo 1024000 > /sys/block/zram0/disksize"
+# Run allocation and check if comp_algorithm updates to zstd and swappiness to 150
+sudo ./scripts/setup-zram.sh
 ```
-*Verification Check:* Run `cat /sys/block/zram0/comp_algorithm` and verify `[zstd]` is bracketed as active.
+*Verification Check:* Run `cat /sys/block/zram0/comp_algorithm` and verify `[zstd]` is active. Run `cat /proc/sys/vm/swappiness` and verify output is `150`.
 
 ### 2. Network Policy Routing Table
 Verify policy parameters are added to route tables:

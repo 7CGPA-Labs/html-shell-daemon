@@ -54,7 +54,11 @@ mkswap /dev/zram0
 echo "[*] Activating swap space swapon..."
 swapon -p 32767 /dev/zram0
 
-# 6. OPTIONAL: Configure physical flash storage writeback targets to offload idle, uncompressed pages
+# 6. Elevate kernel swappiness properties (matches legacy watchdog setting)
+echo "[*] Elevating system swappiness memory configurations to 150..."
+sysctl vm.swappiness=150
+
+# 7. OPTIONAL: Configure physical flash storage writeback targets to offload idle, uncompressed pages
 WRITEBACK_DEV="${1:-}" # Optional physical block device or file path
 if [ -n "$WRITEBACK_DEV" ]; then
     echo "[*] Enabling physical writeback target: $WRITEBACK_DEV"

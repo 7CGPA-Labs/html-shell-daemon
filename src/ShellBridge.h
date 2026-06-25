@@ -20,6 +20,11 @@ public slots:
     void executeSystemCommand(const QString &command);
     void logWebEvent(const QString &message);
     
+    // ZRAM/Telemetry query slots carrying over legacy business logic
+    QString getZramDiskSize();
+    QString getZramAlgorithm();
+    QString getSystemSwappiness();
+    
     // Internal slots used to intercept data streams from the JobManager
     void handleJobProgressUpdate(const QString &jobId, int progress);
     void handleJobCompletionUpdate(const QString &jobId, bool success, const QString &message);
