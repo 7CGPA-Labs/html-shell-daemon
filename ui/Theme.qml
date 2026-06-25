@@ -20,6 +20,12 @@ QtObject {
     readonly property int itemSpacing: 12
     readonly property int cornerRadius: 6
     readonly property int iconSize: 16
+    readonly property int tabHeight: 36
+    readonly property int tabWidth: 160
+
+    readonly property color tabActiveBackground: "#1a1a1a"
+    readonly property color tabInactiveBackground: "#101010"
+    readonly property color tabActiveBorder: "#007acc"
 
     readonly property string iconDrawer: "qrc:/icons/drawer.svg"
     readonly property string iconCalendar: "qrc:/icons/calendar.svg"

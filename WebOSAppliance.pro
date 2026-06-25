@@ -23,6 +23,6 @@ PRE_TARGETDEPS += copy_assets
 target.path = /usr/bin
 INSTALLS += target
 
-webapps.files = web-apps/test.html
-webapps.path = /usr/bin/web-apps
+webapps.files = web-apps
+webapps.path = /usr/bin
 INSTALLS += webapps

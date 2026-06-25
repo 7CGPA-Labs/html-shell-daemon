@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files | WebOS File Viewer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+    <div class="files-app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="files-sidebar">
+            <div class="section-title">Mount Points</div>
+            <ul class="drive-list">
+                <li class="active" onclick="switchDirectory('system-root')">
+                    <span class="icon">🔒</span>
+                    <span class="label">dm-verity Root (/)</span>
+                </li>
+                <li onclick="switchDirectory('user-home')">
+                    <span class="icon">🔑</span>
+                    <span class="label">tpm-luks User (/home)</span>
+                </li>
+                <li onclick="switchDirectory('sandbox-rootfs')">
+                    <span class="icon">📦</span>
+                    <span class="label">Container userland (/var/lib/webos/rootfs)</span>
+                </li>
+            </ul>
+
+            <div class="section-title">Devices</div>
+            <ul class="drive-list">
+                <li onclick="switchDirectory('external-usb')">
+                    <span class="icon">🔌</span>
+                    <span class="label">External USB Backup</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Explorer Area -->
+        <main class="files-main">
+            <header class="explorer-header">
+                <div class="path-bar">
+                    <span>Path:</span>
+                    <span id="current-path" class="path-text">/var/lib/webos/rootfs/</span>
+                </div>
+                <button class="btn btn-primary" onclick="triggerBackupJob()">
+                    <span class="btn-icon">📁</span> Backup Files to USB
+                </button>
+            </header>
+
+            <!-- File Grid/List -->
+            <section class="explorer-content">
+                <table class="files-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Permissions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="files-list-body">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Task Telemetry Footer -->
+            <footer id="files-telemetry-footer" class="files-footer hidden">
+                <div class="footer-job-details">
+                    <span class="job-lbl">Async System Copy Job</span>
+                    <span id="footer-job-id" class="job-id">ID: ----</span>
+                </div>
+                <div class="footer-progress-track">
+                    <div id="footer-progress-fill" class="footer-progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="footer-status-row">
+                    <span id="footer-percentage-text">0% Completed</span>
+                    <span id="footer-status-msg">Executing File Worker...</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

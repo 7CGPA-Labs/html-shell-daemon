@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Control | WebOS Settings</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+    <div class="settings-container">
+        <header class="settings-header">
+            <h1>⚙️ Unified Control</h1>
+            <p>Appliance System Preferences & simulated telephony status</p>
+        </header>
+
+        <div class="settings-grid">
+            <!-- Low-Level Hardware System settings -->
+            <section class="card">
+                <h2>Hardware & Display</h2>
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <span class="label">Screen Brightness</span>
+                        <span class="sublabel">Direct sysfs control (/sys/class/backlight)</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="brightness-slider" min="10" max="100" value="80" class="range-slider" oninput="changeBrightness(this.value)">
+                        <span id="brightness-val" class="slider-badge">80%</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <span class="label">System Audio Volume</span>
+                        <span class="sublabel">Alsa mixer audio output level</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="volume-slider" min="0" max="100" value="70" class="range-slider" oninput="changeVolume(this.value)">
+                        <span id="volume-val" class="slider-badge">70%</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Network & Cellular Card -->
+            <section class="card">
+                <h2>Network & Cellular</h2>
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <span class="label">Mobile 4G Data</span>
+                        <span class="sublabel">Use mobile network for internet when not casting</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="mobile-data-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <span class="label">Preferred Network Type</span>
+                        <span class="sublabel">Select network technology generation</span>
+                    </div>
+                    <select id="network-type-select" class="dropdown">
+                        <option value="lte">4G LTE (Recommended)</option>
+                        <option value="3g">3G Only</option>
+                        <option value="2g">2G Only</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- APN Configuration Card -->
+            <section class="card">
+                <h2>Access Point Name (APN)</h2>
+                <div class="apn-form">
+                    <div class="form-group">
+                        <label for="apn-name">APN Name</label>
+                        <input type="text" id="apn-name" value="WebOS Cellular Internet" class="text-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="apn-address">APN Address</label>
+                        <input type="text" id="apn-address" value="internet.webos.apn" class="text-input">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveAPN()">Save APN Profile</button>
+                </div>
+            </section>
+
+            <!-- Security & Storage Partition Card -->
+            <section class="card">
+                <h2>Zero-Trust Security</h2>
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <span class="label">dm-verity Verification</span>
+                        <span class="sublabel">Cryptographic read-only root status</span>
+                    </div>
+                    <span class="badge success">VERIFIED</span>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <span class="label">TPM LUKS Partition</span>
+                        <span class="sublabel">Encrypted user sandbox partition bind</span>
+                    </div>
+                    <span class="badge success">TPM-BOUND</span>
+                </div>
+                
+                <div class="system-power-actions">
+                    <h3>Appliance Power Actions</h3>
+                    <div class="power-buttons">
+                        <button class="btn btn-danger" onclick="triggerPowerAction('shutdown')">Shutdown</button>
+                        <button class="btn btn-warning" onclick="triggerPowerAction('reboot')">Reboot</button>
+                        <button class="btn btn-secondary" onclick="triggerPowerAction('powerwash')">Powerwash</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- oFono Dummy Telephony Status Card -->
+            <section class="card telemetry-card">
+                <h2>oFono Telephony Engine & System Metrics (Simulated)</h2>
+                <div class="telemetry-info">
+                    <div class="telemetry-row">
+                        <span class="t-label">Simulation State</span>
+                        <span class="t-val badge success">Active</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span class="t-label">zRAM compression</span>
+                        <span class="t-val" id="zram-usage">zstd (34% Used)</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span class="t-label">Signal Strength</span>
+                        <span class="t-val" id="ofono-signal">-78 dBm (Excellent)</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span class="t-label">CPU Performance</span>
+                        <span class="t-val" id="cpu-load">12% Load</span>
+                    </div>
+                </div>
+                <div class="logs-section">
+                    <h3>SMS & Signal Telemetry Log</h3>
+                    <div id="telemetry-logs" class="logs-box">
+                        <div class="log-entry">[oFono] Registered mock interface dbus paths...</div>
+                        <div class="log-entry">[oFono] Simulated cellular network handshake complete.</div>
+                        <div class="log-entry">[dm-verity] Boot validation check succeeded.</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
