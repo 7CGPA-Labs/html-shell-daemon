@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# WebOS Appliance - dm-verity Boot Block Cryptographic Verification Setup
+# Anodyne OS - dm-verity Boot Block Cryptographic Verification Setup
 # ==============================================================================
 # Packages the container userland and calculates verification hash parameters.
 # ==============================================================================
@@ -8,8 +8,8 @@
 set -euo pipefail
 
 # Configuration paths
-USERLAND_DIR="/var/lib/webos/rootfs"
-BUILD_DIR="/tmp/webos_build"
+USERLAND_DIR="/var/lib/anodyne/rootfs"
+BUILD_DIR="/tmp/anodyne_build"
 SQUASHFS_IMAGE="$BUILD_DIR/rootfs.squashfs"
 VERITY_HASH_DEV="$BUILD_DIR/rootfs.verity_hash"
 VERITY_METADATA="$BUILD_DIR/verity_metadata.json"
@@ -38,9 +38,9 @@ done
 echo "[*] Packaging $USERLAND_DIR into a compressed SquashFS block..."
 if [ ! -d "$USERLAND_DIR" ] || [ -z "$(ls -A "$USERLAND_DIR")" ]; then
     echo "[!] WARNING: $USERLAND_DIR is empty. Packaging a fallback mock folder for sandbox testing..."
-    MOCK_ROOT="/tmp/webos_mock_root"
+    MOCK_ROOT="/tmp/anodyne_mock_root"
     mkdir -p "$MOCK_ROOT/bin" "$MOCK_ROOT/etc" "$MOCK_ROOT/usr"
-    echo "WebOS Appliance minimal root" > "$MOCK_ROOT/etc/webos-release"
+    echo "Anodyne OS minimal root" > "$MOCK_ROOT/etc/anodyne-release"
     mksquashfs "$MOCK_ROOT" "$SQUASHFS_IMAGE" -noappend -comp xz
 else
     mksquashfs "$USERLAND_DIR" "$SQUASHFS_IMAGE" -noappend -comp xz
@@ -82,7 +82,7 @@ echo "--------------------------------------------------"
 echo "[*] Generating GRUB kernel boot command mapping parameters..."
 echo ""
 echo ">>> INTEGRATE THE FOLLOWING LINE INTO GRUB_CMDLINE_LINUX_DEFAULT <<<"
-echo "systemd.verity=1 verity.usr=UUID=$UUID_VAL usrhash=$ROOT_HASH dm-mod.create=\"webos_root,,,ro, 0 $DATA_BLOCKS verity /dev/loop0 /dev/loop1 0 sha256 $ROOT_HASH\""
+echo "systemd.verity=1 verity.usr=UUID=$UUID_VAL usrhash=$ROOT_HASH dm-mod.create=\"anodyne_root,,,ro, 0 $DATA_BLOCKS verity /dev/loop0 /dev/loop1 0 sha256 $ROOT_HASH\""
 echo ""
 echo "[*] Done. SquashFS and verification hashes are ready in $BUILD_DIR."
 EOF

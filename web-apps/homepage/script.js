@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     initializeClock();
-    initializeWebOSIPCBridge();
+    initializeAnodyneIPCBridge();
 });
 
 // 1. Live Momentum Clock Tracking Logic
@@ -23,7 +23,7 @@ function initializeClock() {
 }
 
 // 2. Multithreaded IPC WebChannel Connection Management
-function initializeWebOSIPCBridge() {
+function initializeAnodyneIPCBridge() {
     if (typeof qt !== 'undefined' && qt.webChannelTransport) {
         new QWebChannel(qt.webChannelTransport, function(channel) {
             window.sysContext = channel.objects.sysContext;

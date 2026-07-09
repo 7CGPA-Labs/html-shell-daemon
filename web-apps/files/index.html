@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Files | WebOS File Viewer</title>
+    <title>Files | Anodyne File Viewer</title>
     <link rel="stylesheet" href="style.css">
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 </head>
@@ -23,7 +23,7 @@
                 </li>
                 <li onclick="switchDirectory('sandbox-rootfs')">
                     <span class="icon">📦</span>
-                    <span class="label">Container userland (/var/lib/webos/rootfs)</span>
+                    <span class="label">Container userland (/var/lib/anodyne/rootfs)</span>
                 </li>
             </ul>
 
@@ -41,7 +41,7 @@
             <header class="explorer-header">
                 <div class="path-bar">
                     <span>Path:</span>
-                    <span id="current-path" class="path-text">/var/lib/webos/rootfs/</span>
+                    <span id="current-path" class="path-text">/var/lib/anodyne/rootfs/</span>
                 </div>
                 <button class="btn btn-primary" onclick="triggerBackupJob()">
                     <span class="btn-icon">📁</span> Backup Files to USB

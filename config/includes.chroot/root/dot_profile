@@ -1,20 +1,20 @@
 # ==============================================================================
-# WebOS Appliance - Root Autologin Kiosk Launcher Profile
+# Anodyne OS - Root Autologin Kiosk Launcher Profile
 # ==============================================================================
 # Auto-triggers graphical initialization on tty1 root logins.
 # ==============================================================================
 
 # Check if shell is active on tty1
 if [ "$(tty)" = "/dev/tty1" ]; then
-    echo "[*] Initializing X11 Server and launching WebOS Appliance Shell..."
+    echo "[*] Initializing X11 Server and launching Anodyne OS Shell..."
     
     # Check if the shell executable is installed
-    if [ -f /usr/bin/WebOSAppliance ]; then
+    if [ -f /usr/bin/AnodyneOS ]; then
         # Launch X server displaying our custom QML runtime shell binary full-screen
         # The '-nocursor' flag hides the legacy system mouse pointer for premium styling
-        exec startx /usr/bin/WebOSAppliance -- -nocursor
+        exec startx /usr/bin/AnodyneOS -- -nocursor
     else
-        echo "[-] ERROR: WebOSAppliance core binary not found in /usr/bin."
+        echo "[-] ERROR: AnodyneOS core binary not found in /usr/bin."
         echo "    Verify that target installation step completed."
     fi
 fi

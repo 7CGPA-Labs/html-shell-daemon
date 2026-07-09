@@ -7,32 +7,32 @@ I have completed all tasks under **Milestone 2: OS Foundation**. The system now 
 ## 🛠️ Summary of Changes
 
 ### 1. Low-Level OS Setup Scripts
-- [setup-luks-tpm.sh](file:///c:/Users/gagan/Projects/webos-appliance/html-shell-daemon/scripts/setup-luks-tpm.sh):
+- [setup-luks-tpm.sh](file:///c:/Users/gagan/Projects/anodyne-os/html-shell-daemon/scripts/setup-luks-tpm.sh):
   - Automates formatting partitions with LUKS2 encryption.
   - Seals the randomly generated block encryption key into the TPM 2.0 security module using PCR registers 0 (Firmware), 4 (Bootloader), and 7 (Secure Boot). If the firmware or boot configuration is tampered with, the TPM locks the user partition.
   - Registers the encrypted container inside `/etc/crypttab` with automated systemd decrypt scripts.
-- [setup-dm-verity.sh](file:///c:/Users/gagan/Projects/webos-appliance/html-shell-daemon/scripts/setup-dm-verity.sh):
+- [setup-dm-verity.sh](file:///c:/Users/gagan/Projects/anodyne-os/html-shell-daemon/scripts/setup-dm-verity.sh):
   - Packages the container directory into an immutable, read-only compressed SquashFS root system block.
   - Formats the block device with dm-verity and generates SHA-256 block tree hashes to compute a root verification signature.
   - Exports systemd / GRUB boot configuration mappings (`usrhash`) for bootloader alignment.
-- [setup-zram.sh](file:///c:/Users/gagan/Projects/webos-appliance/html-shell-daemon/scripts/setup-zram.sh):
+- [setup-zram.sh](file:///c:/Users/gagan/Projects/anodyne-os/html-shell-daemon/scripts/setup-zram.sh):
   - Initializes `/dev/zram0` as a compressed swap block device using the kernel's `zstd` compression engine.
   - Dynamically calculates memory capacity and sizes zRAM to 1.5x total system RAM size.
   - Maps optional physical storage file hooks as swap writebacks for idle pages.
-- [setup-network-routing.sh](file:///c:/Users/gagan/Projects/webos-appliance/html-shell-daemon/scripts/setup-network-routing.sh):
+- [setup-network-routing.sh](file:///c:/Users/gagan/Projects/anodyne-os/html-shell-daemon/scripts/setup-network-routing.sh):
   - Registers policy routing table `casting` (ID 100) inside `/etc/iproute2/rt_tables`.
   - Configures rules to route Wi-Fi Direct screen-casting streams (local subnet `192.168.49.0/24`) through the secondary link interface `wlan1`.
   - Configures the default main routing gateway to route internet traffic over mobile cellular endpoints (`rmnet0`/`wwan0`).
 
 ### 2. Live-Build Templates
-- [fix-bootloader.sh](file:///c:/Users/gagan/Projects/webos-appliance/html-shell-daemon/config/bootloaders/isolinux/fix-bootloader.sh):
+- [fix-bootloader.sh](file:///c:/Users/gagan/Projects/anodyne-os/html-shell-daemon/config/bootloaders/isolinux/fix-bootloader.sh):
   - Resolves standard `ldlinux.c32` bootloader warnings by clearing live-build caches and copying isolinux BIOS modules from host libraries.
   - Writes pristine `isolinux.cfg` files mapping verity boot parameters.
-- [dot_profile](file:///c:/Users/gagan/Projects/webos-appliance/html-shell-daemon/config/includes.chroot/root/dot_profile):
+- [dot_profile](file:///c:/Users/gagan/Projects/anodyne-os/html-shell-daemon/config/includes.chroot/root/dot_profile):
   - Placed inside root's profile configurations. Auto-triggers graphical initialization on tty1 root logins, starting X server and launching the custom QML shell binary full-screen with cursor pointer rendering suppressed (`-nocursor`).
 
 ### 3. Repository Documentation
-- Updated [README.md](file:///c:/Users/gagan/Projects/webos-appliance/html-shell-daemon/README.md) to document setup command guidelines for all low-level system scripts, live-build directory structures, and boot verification architectures.
+- Updated [README.md](file:///c:/Users/gagan/Projects/anodyne-os/html-shell-daemon/README.md) to document setup command guidelines for all low-level system scripts, live-build directory structures, and boot verification architectures.
 
 ---
 
@@ -49,7 +49,7 @@ graph TD
     subgraph User Data Mount Phase
         Kernel -->|Request Key Release| TPM[TPM 2.0 Hardware NV Handle]
         TPM -->|Release Key iff PCRs Match| LUKS[LUKS2 User Partition]
-        LUKS -->|Decrypted & Mounted| Profiles[/var/lib/webos/profiles]
+        LUKS -->|Decrypted & Mounted| Profiles[/var/lib/anodyne/profiles]
     end
 
     subgraph Runtime Optimization

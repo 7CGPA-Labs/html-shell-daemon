@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# WebOS Appliance - zRAM compressed swap (zstd algorithm) setup script
+# Anodyne OS - zRAM compressed swap (zstd algorithm) setup script
 # ==============================================================================
 # Configures swap virtualization to run heavy browser runtimes on low-RAM limits.
 # ==============================================================================

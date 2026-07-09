@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# WebOS Appliance - Dual-Wireless Network policy-based routing tables configuration
+# Anodyne OS - Dual-Wireless Network policy-based routing tables configuration
 # ==============================================================================
 # Separates Wi-Fi Direct screen-casting streams from cellular 4G mobile data.
 # ==============================================================================

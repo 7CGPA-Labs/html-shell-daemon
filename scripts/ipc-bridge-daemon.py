@@ -5,7 +5,7 @@ import time
 import sys
 
 # Shared runtime directories mapped between container and host
-IPC_DIR = "/var/lib/webos/ipc"
+IPC_DIR = "/var/lib/anodyne/ipc"
 OUTBOX = os.path.join(IPC_DIR, "outbox")  # Container writes here, host reads
 INBOX = os.path.join(IPC_DIR, "inbox")    # Host writes here, container reads
 
@@ -27,7 +27,7 @@ def init_environment():
         with open(SYSFS_VOLUME_MOCK, "w") as f:
             f.write("70")
             
-    print(f"=== WebOS Appliance IPC Bridge Daemon v1.0 ===")
+    print(f"=== Anodyne OS IPC Bridge Daemon v1.0 ===")
     print(f"Watching outbox: {OUTBOX}")
     print(f"Response inbox: {INBOX}")
     print(f"Mock backlight sysfs register: {SYSFS_BACKLIGHT_MOCK}")

@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", function() {
-    initializeWebOSIPCBridge();
+    initializeAnodyneIPCBridge();
     setupSettingListeners();
     startSimulatedModemTelemetry();
     startSystemMetricsSimulation();
 });
 
 // 1. QWebChannel Host Synchronization
-function initializeWebOSIPCBridge() {
+function initializeAnodyneIPCBridge() {
     if (typeof qt !== 'undefined' && qt.webChannelTransport) {
         new QWebChannel(qt.webChannelTransport, function(channel) {
             window.sysContext = channel.objects.sysContext;
@@ -136,7 +136,7 @@ function startSimulatedModemTelemetry() {
     const simulatedSMS = [
         "SMS from +14155552671: 'System deployment status: OK'",
         "SMS from Carrier: 'APN profile sync succeeded.'",
-        "SMS from +14155559092: 'Check out the new WebOS workspace!'",
+        "SMS from +14155559092: 'Check out the new Anodyne workspace!'",
         "SMS from System Watchdog: 'Memory compression zRAM zstd optimized.'"
     ];
 

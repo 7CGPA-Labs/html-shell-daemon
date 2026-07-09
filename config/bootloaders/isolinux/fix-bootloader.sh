@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# WebOS Appliance - Live-Build Bootloader Warning Fix & Cache Purge Tool
+# Anodyne OS - Live-Build Bootloader Warning Fix & Cache Purge Tool
 # ==============================================================================
 # Solves the "ldlinux.c32" bootloader warning when loading built ISOs in virtualbox.
 # ==============================================================================
@@ -56,16 +56,16 @@ default vesamenu.c32
 prompt 0
 timeout 50
 
-menu title Project WebOS Appliance Boot Kiosk
+menu title Project Anodyne OS Boot Kiosk
 menu background 
 
 label live
-    menu label Start WebOS Appliance (dm-verity secure boot)
+    menu label Start Anodyne OS (dm-verity secure boot)
     kernel /live/vmlinuz
     append initrd=/live/initrd.img boot=live components quiet splash systemd.verity=1
 
 label live-failsafe
-    menu label Start WebOS Appliance (Failsafe Mode)
+    menu label Start Anodyne OS (Failsafe Mode)
     kernel /live/vmlinuz
     append initrd=/live/initrd.img boot=live components xforcevesa nomodeset noapic noacpi nosplash irqpoll
 EOF

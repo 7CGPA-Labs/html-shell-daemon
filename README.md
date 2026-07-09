@@ -1,6 +1,6 @@
-# Project WebOS Appliance (v1.0) - Core System Shell
+# Project Anodyne OS (v1.0) - Core System Shell
 
-Project WebOS Appliance is a lightweight, zero-trust hybrid operating system framework engineered specifically for legacy and resource-constrained hardware (2GB–4GB RAM). This repository contains the **Hard Layer** (native C++ & Qt/QML runtime executable) and the baseline **Soft Layer** (PWA/HTML5 dashboard interface), interconnected via a secure, bidirectional, multi-threaded Inter-Process Communication (IPC) engine.
+Project Anodyne OS is a lightweight, zero-trust hybrid operating system framework engineered specifically for legacy and resource-constrained hardware (2GB–4GB RAM). This repository contains the **Hard Layer** (native C++ & Qt/QML runtime executable) and the baseline **Soft Layer** (PWA/HTML5 dashboard interface), interconnected via a secure, bidirectional, multi-threaded Inter-Process Communication (IPC) engine.
 
 ## Architectural Overview
 
@@ -8,7 +8,7 @@ Project WebOS Appliance is a lightweight, zero-trust hybrid operating system fra
 2. **Tabbed Multitasking (App Registry):** Traditional taskbars are discarded. Browser tabs serve as the core manager; switching active tabs corresponds directly to switching application contexts. WebEngine instances are preserved in the QML background to maintain state without reloading.
 3. **The Secure IPC Bridge:** Powered by `QWebChannel`. Exposes a hardened platform interface (`window.sysContext`) securely to local sandboxed PWA web applications without allowing raw terminal access.
 4. **Asynchronous I/O (Job Manager):** Offloads heavy disk and file operations to a native C++ background thread pool. Operations execute concurrently and asynchronously, reporting real-time progress metrics to web client progress-bars.
-5. **Cross-Userland Bridge Daemon:** Simulates folder-based outbox/inbox IPC (`/var/lib/webos/ipc/`) bridging the isolated containerized desktop PWA scripts with the host Linux kernel (writing backlight brightness to sysfs and cellular network swaps to oFono via D-Bus).
+5. **Cross-Userland Bridge Daemon:** Simulates folder-based outbox/inbox IPC (`/var/lib/anodyne/ipc/`) bridging the isolated containerized desktop PWA scripts with the host Linux kernel (writing backlight brightness to sysfs and cellular network swaps to oFono via D-Bus).
 6. **Zero-Trust Asset Packaging:** System apps and icon layouts are packaged locally offline using zero-network Web Awesome inline SVG vectors for maximum security compliance.
 
 ---
@@ -18,8 +18,8 @@ Project WebOS Appliance is a lightweight, zero-trust hybrid operating system fra
 Ensure your project layout matches the structure below before running compilation tasks:
 
 ```text
-/WebOS-Appliance
-├── WebOSAppliance.pro          # Qt Project compilation configuration map
+/Anodyne-Appliance
+├── AnodyneOS.pro          # Qt Project compilation configuration map
 ├── /src
 │   ├── main.cpp                # System application vector & context initializer
 │   ├── ShellBridge.h           # JavaScript-to-C++ gateway declaration
@@ -142,7 +142,7 @@ qmake --version
 
 ## Building the Shell Core
 
-Execute these commands from the root directory of your `/WebOS-Appliance` folder:
+Execute these commands from the root directory of your `/Anodyne-Appliance` folder:
 
 ```bash
 # 1. Clear any old generation caching artifacts or Makefiles
@@ -150,7 +150,7 @@ make clean
 rm -f Makefile
 
 # 2. Evaluate project metadata and generate a clean Makefile
-qmake WebOSAppliance.pro
+qmake AnodyneOS.pro
 
 # 3. Build the native machine payload executable
 make
@@ -160,10 +160,10 @@ make
 
 ## Running the Application
 
-Once compilation succeeds, a native executable binary artifact named `WebOSAppliance` will be generated in your project root. Run it directly with:
+Once compilation succeeds, a native executable binary artifact named `AnodyneOS` will be generated in your project root. Run it directly with:
 
 ```bash
-./WebOSAppliance
+./AnodyneOS
 ```
 
 To test the cross-userland bridge protocol concurrently on the host machine:

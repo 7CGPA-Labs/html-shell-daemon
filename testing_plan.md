@@ -1,4 +1,4 @@
-# Unified Verification & Testing Plan - Project WebOS Appliance
+# Unified Verification & Testing Plan - Project Anodyne OS
 
 This document provides complete instructions to compile, verify, and dry-run test the features implemented in Milestones 1 and 2, including the ZRAM metrics query integration.
 
@@ -28,17 +28,17 @@ make clean || true
 rm -f Makefile
 
 # Generate Makefile
-qmake WebOSAppliance.pro
+qmake AnodyneOS.pro
 
 # Compile binary
 make -j$(nproc)
 ```
-*Verification Check:* Confirm that a compiled binary named `WebOSAppliance` exists in the folder.
+*Verification Check:* Confirm that a compiled binary named `AnodyneOS` exists in the folder.
 
 ### 3. Run the Shell
 Start the system shell locally:
 ```bash
-./WebOSAppliance
+./AnodyneOS
 ```
 
 ---
@@ -128,7 +128,7 @@ bash -n scripts/setup-dm-verity.sh
 # Execute build block run
 sudo ./scripts/setup-dm-verity.sh
 ```
-*Verification Check:* Check if a hash block device is outputted in `/tmp/webos_build/rootfs.verity_hash` and matches the hash in `/tmp/webos_build/verity_metadata.json`.
+*Verification Check:* Check if a hash block device is outputted in `/tmp/anodyne_build/rootfs.verity_hash` and matches the hash in `/tmp/anodyne_build/verity_metadata.json`.
 
 ### 4. TPM LUKS User partition
 Verify cryptsetup maps correctly:

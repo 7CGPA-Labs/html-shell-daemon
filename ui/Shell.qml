@@ -10,7 +10,7 @@ Window {
     visible: true
     width: 1280
     height: 720
-    title: "Project WebOS Appliance Core"
+    title: "Project Anodyne OS Core"
     flags: Qt.FramelessWindowHint
 
     // Base background styling

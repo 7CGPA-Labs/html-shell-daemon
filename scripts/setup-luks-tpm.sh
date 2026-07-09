@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# WebOS Appliance - TPM 2.0-bound LUKS2 Partition Encryption Setup Script
+# Anodyne OS - TPM 2.0-bound LUKS2 Partition Encryption Setup Script
 # ==============================================================================
 # Sets up encrypted user volumes bound to system Trusted Platform Module (TPM).
 # ==============================================================================
@@ -9,8 +9,8 @@ set -euo pipefail
 
 # Configuration parameters
 PARTITION_DEVICE="${1:-}" # Device path, e.g. /dev/sdb2 or /dev/nvme0n1p2
-MAP_NAME="webos_secure_data"
-MOUNT_POINT="/var/lib/webos/profiles"
+MAP_NAME="anodyne_secure_data"
+MOUNT_POINT="/var/lib/anodyne/profiles"
 KEY_FILE="/tmp/tpm_luks_transient.key"
 
 # Ensure script is running as root

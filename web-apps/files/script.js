@@ -1,11 +1,11 @@
 document.addEventListener("DOMContentLoaded", function() {
-    initializeWebOSIPCBridge();
+    initializeAnodyneIPCBridge();
     // Default to container rootfs view
     switchDirectory('sandbox-rootfs');
 });
 
 // 1. Host QWebChannel Synchronization
-function initializeWebOSIPCBridge() {
+function initializeAnodyneIPCBridge() {
     if (typeof qt !== 'undefined' && qt.webChannelTransport) {
         new QWebChannel(qt.webChannelTransport, function(channel) {
             window.sysContext = channel.objects.sysContext;
@@ -49,13 +49,13 @@ const fileSystemData = {
         ]
     },
     'sandbox-rootfs': {
-        path: '/var/lib/webos/rootfs/',
+        path: '/var/lib/anodyne/rootfs/',
         items: [
             { name: 'src', type: 'Directory', size: '--', perms: 'drwxr-xr-x' },
             { name: 'ui', type: 'Directory', size: '--', perms: 'drwxr-xr-x' },
             { name: 'web-apps', type: 'Directory', size: '--', perms: 'drwxr-xr-x' },
             { name: 'main.cpp', type: 'C++ Source', size: '1.9 KB', perms: '-rw-r--r--' },
-            { name: 'WebOSAppliance.pro', type: 'Project config', size: '837 B', perms: '-rw-r--r--' },
+            { name: 'AnodyneOS.pro', type: 'Project config', size: '837 B', perms: '-rw-r--r--' },
             { name: 'LICENSE', type: 'License file', size: '35.8 KB', perms: '-rw-r--r--' },
             { name: 'README.md', type: 'Markdown doc', size: '5.8 KB', perms: '-rw-r--r--' }
         ]
