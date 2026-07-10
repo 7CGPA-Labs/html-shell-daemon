@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Controls 2.15
 import "."
 
 Item {
@@ -72,48 +73,107 @@ Item {
                 color: theme.barBorder
             }
 
-            ListView {
-                id: appList
+            SwipeView {
+                id: swipeView
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                spacing: 4
-                boundsBehavior: Flickable.StopAtBounds
 
-                model: ListModel {
-                    ListElement {
-                        appId: "home"
-                        title: "Home"
-                        subtitle: "Momentum dashboard"
-                        url: "about:blank"
-                    }
-                    ListElement {
-                        appId: "files"
-                        title: "Files"
-                        subtitle: "Local file viewer PWA"
-                        url: "https://example.com/mock-local-file-viewer"
-                    }
-                    ListElement {
-                        appId: "settings"
-                        title: "Settings"
-                        subtitle: "System preferences PWA"
-                        url: "https://example.com/mock-settings"
-                    }
-                    ListElement {
-                        appId: "calendar"
-                        title: "Calendar"
-                        subtitle: "Timeline and events PWA"
-                        url: "https://example.com/mock-calendar"
+                // Page 1: Core Apps Grid
+                Item {
+                    GridView {
+                        id: grid1
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        cellWidth: parent.width / 2
+                        cellHeight: 70
+                        clip: true
+                        model: ListModel {
+                            ListElement {
+                                appId: "home"
+                                title: "Home"
+                                subtitle: "Dashboard"
+                                url: "about:blank"
+                            }
+                            ListElement {
+                                appId: "files"
+                                title: "Files"
+                                subtitle: "File Viewer"
+                                url: "https://example.com/mock-local-file-viewer"
+                            }
+                            ListElement {
+                                appId: "settings"
+                                title: "Settings"
+                                subtitle: "Preferences"
+                                url: "https://example.com/mock-settings"
+                            }
+                            ListElement {
+                                appId: "calendar"
+                                title: "Calendar"
+                                subtitle: "Events"
+                                url: "https://example.com/mock-calendar"
+                            }
+                        }
+                        delegate: AppDrawerItem {
+                            width: grid1.cellWidth - 8
+                            theme: root.theme
+                            label: title
+                            subtitle: subtitle
+                            property string localAppId: model ? model.appId : ""
+                            property string localUrl: model ? model.url : ""
+                            property string localTitle: model ? model.title : ""
+                            onClicked: root.appLaunched(localAppId, localUrl, localTitle)
+                        }
                     }
                 }
 
-                delegate: AppDrawerItem {
-                    width: appList.width
-                    theme: root.theme
-                    label: title
-                    subtitle: subtitle
-                    onClicked: root.appLaunched(appId, url, title)
+                // Page 2: System Utilities / Extensions Grid
+                Item {
+                    GridView {
+                        id: grid2
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        cellWidth: parent.width / 2
+                        cellHeight: 70
+                        clip: true
+                        model: ListModel {
+                            ListElement {
+                                appId: "gemini"
+                                title: "Gemini"
+                                subtitle: "AI Search"
+                                url: "https://gemini.google.com/app"
+                            }
+                            ListElement {
+                                appId: "diagnostics"
+                                title: "Diagnostics"
+                                subtitle: "Sys Monitor"
+                                url: ""
+                            }
+                        }
+                        delegate: AppDrawerItem {
+                            width: grid2.cellWidth - 8
+                            theme: root.theme
+                            label: title
+                            subtitle: subtitle
+                            property string localAppId: model ? model.appId : ""
+                            property string localUrl: model ? model.url : ""
+                            property string localTitle: model ? model.title : ""
+                            onClicked: {
+                                if (localAppId === "diagnostics") {
+                                    root.closed();
+                                }
+                                root.appLaunched(localAppId, localUrl, localTitle);
+                            }
+                        }
+                    }
                 }
+            }
+
+            PageIndicator {
+                id: indicator
+                count: swipeView.count
+                currentIndex: swipeView.currentIndex
+                Layout.alignment: Qt.AlignHCenter
             }
         }
     }

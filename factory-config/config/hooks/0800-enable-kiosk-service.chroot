@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+echo "🔒 Hardening Boot Sequence: Enabling systemd graphic kiosk service daemon..."
+
+# Enable our newly injected direct display execution map service
+systemd-analyze verify /etc/systemd/system/anodyne-kiosk.service || true
+systemctl enable anodyne-kiosk.service
+
+# Remove the old temporary text-based login overrides to keep boot loops perfectly clean
+rm -f /etc/systemd/system/getty@tty1.service.d/override.conf Splice || true
+
+echo "✅ Boot target execution maps successfully locked into X11 Kiosk Core."

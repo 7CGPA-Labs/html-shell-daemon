@@ -1,0 +1,16 @@
+[Unit]
+Description=Project Anodyne OS Graphic Kiosk Interface Runtime
+After=systemd-user-sessions.service syslog.target network.target sound.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root
+ExecStart=/usr/bin/xinit /usr/bin/anodyne-kiosk-start.sh -- :0 -quiet
+Restart=always
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

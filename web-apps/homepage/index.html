@@ -3,41 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anodyne OS Homepage</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 </head>
 <body>
+    <!-- Transparent overlay to ensure maximum contrast -->
+    <div class="momentum-overlay"></div>
 
     <div class="homepage-container">
-        <header class="hero-header">
-            <h1 id="live-clock">00:00:00</h1>
-            <h2 id="user-greeting">Welcome back</h2>
-        </header>
-
-        <main class="dashboard-grid">
-            
-            <section class="card app-launcher-section">
-                <h3>System Applications</h3>
+        <!-- Top Left: Minimal Launcher Widget -->
+        <div class="corner top-left">
+            <button class="widget-btn" onclick="toggleWidget('launcher-panel')">📁 Applications</button>
+            <div id="launcher-panel" class="translucent-panel hidden">
+                <div class="panel-header">System Apps</div>
                 <div class="launcher-grid">
                     <button class="app-card" onclick="launchApp('files')">
                         <span class="icon">📁</span>
-                        <span class="label">File Viewer</span>
+                        <span class="label">Files</span>
                     </button>
                     <button class="app-card" onclick="launchApp('settings')">
                         <span class="icon">⚙️</span>
-                        <span class="label">OS Settings</span>
+                        <span class="label">Settings</span>
                     </button>
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <section class="card task-monitor-section">
-                <h3>Background Operations</h3>
+        <!-- Top Right: Minimal System Stat Widget -->
+        <div class="corner top-right">
+            <div class="system-stat-widget">
+                <span class="stat-icon">📊</span> <span id="cpu-stat">CPU: --</span>
+            </div>
+        </div>
+
+        <!-- Center: Clock, Greeting & Main Focus -->
+        <div class="center-content">
+            <h1 id="live-clock">00:00</h1>
+            <h2 id="user-greeting">Good day, Gagan.</h2>
+            
+            <div class="focus-container">
+                <p id="focus-prompt" class="focus-label">What is your main focus for today?</p>
+                <input type="text" id="focus-input" class="focus-input" placeholder="write here...">
+                
+                <div id="focus-display" class="focus-display hidden">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="focus-checkbox" onchange="toggleFocusComplete(this.checked)">
+                        <span class="checkmark"></span>
+                        <span id="focus-text" class="focus-text"></span>
+                    </label>
+                    <button class="delete-focus-btn" onclick="clearFocus()">×</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Left: RSS News Feed Widget -->
+        <div class="corner bottom-left">
+            <button class="widget-btn" onclick="toggleWidget('rss-panel')">📰 Developer Feed</button>
+            <div id="rss-panel" class="translucent-panel hidden">
+                <div class="panel-header">Anodyne OS News</div>
+                <div id="rss-items-list" class="rss-list">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Center: Beautiful Rotating Quote -->
+        <div class="bottom-center-quote">
+            <p id="quote-text">"Focus on being productive instead of busy."</p>
+        </div>
+
+        <!-- Bottom Right: Background Operations Monitor -->
+        <div class="corner bottom-right">
+            <button class="widget-btn" id="btn-tasks-widget" onclick="toggleWidget('task-panel')">⚙️ Tasks</button>
+            <div id="task-panel" class="translucent-panel hidden">
+                <div class="panel-header">Background Jobs</div>
                 <div id="no-tasks-msg" class="empty-state">No active background operations.</div>
                 
                 <div id="active-task-container" class="task-box hidden">
                     <div class="task-details">
-                        <span id="task-title">File Copy Operation</span>
+                        <span id="task-title">File Copy</span>
                         <span id="task-id">ID: ----</span>
                     </div>
                     <div class="progress-track">
@@ -47,9 +92,8 @@
                         <span id="task-percentage">0% Completed</span>
                     </div>
                 </div>
-            </section>
-
-        </main>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

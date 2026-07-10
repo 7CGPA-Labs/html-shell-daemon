@@ -12,7 +12,7 @@ if [ "$(tty)" = "/dev/tty1" ]; then
     if [ -f /usr/bin/AnodyneOS ]; then
         # Launch X server displaying our custom QML runtime shell binary full-screen
         # The '-nocursor' flag hides the legacy system mouse pointer for premium styling
-        exec startx /usr/bin/AnodyneOS -- -nocursor
+        exec startx /usr/bin/AnodyneOS
     else
         echo "[-] ERROR: AnodyneOS core binary not found in /usr/bin."
         echo "    Verify that target installation step completed."

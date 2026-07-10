@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupSettingListeners();
     startSimulatedModemTelemetry();
     startSystemMetricsSimulation();
+    switchCategory('display');
 });
 
 // 1. QWebChannel Host Synchronization
@@ -158,4 +159,34 @@ function startSystemMetricsSimulation() {
         const load = 5 + Math.floor(Math.random() * 20);
         cpuDisplay.textContent = `${load}% Load`;
     }, 4000);
+}
+
+function switchCategory(cat) {
+    // Hide all sections
+    const sections = document.querySelectorAll(".settings-section");
+    sections.forEach(sec => sec.classList.add("hidden"));
+
+    // Show selected section
+    const activeSec = document.getElementById("sec-" + cat);
+    if (activeSec) {
+        activeSec.classList.remove("hidden");
+    }
+
+    // Update title
+    const titles = {
+        'display': 'Sound & Display',
+        'network': 'Mobile Network',
+        'security': 'Security & Privacy',
+        'telemetry': 'System Telemetry'
+    };
+    document.getElementById("category-title").textContent = titles[cat] || 'Settings';
+
+    // Update active highlight in sidebar
+    const listItems = document.querySelectorAll(".category-list li");
+    listItems.forEach(li => li.classList.remove("active"));
+    
+    const activeLi = document.getElementById("cat-" + cat);
+    if (activeLi) {
+        activeLi.classList.add("active");
+    }
 }

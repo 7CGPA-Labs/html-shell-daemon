@@ -1,4 +1,4 @@
-QT += core gui quick webengine webchannel
+QT += core gui quick webengine webchannel dbus
 
 CONFIG += c++17
 

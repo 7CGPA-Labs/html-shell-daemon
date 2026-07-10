@@ -3,6 +3,12 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
+#include <QUrl>
+#include <QDateTime>
+#include <QMap>
+#include <QProcess>
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusError>
 
 // Static helper to read sysfs registers
 static QString readSystemFile(const QString &path) {
@@ -19,6 +25,41 @@ ShellBridge::ShellBridge(QObject *parent)
 {
     m_instance = this;
     qDebug() << "ShellBridge: Initialized communication core.";
+
+    // Register this application as the Freedesktop Notification daemon
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    if (bus.registerService("org.freedesktop.Notifications")) {
+        bus.registerObject("/org/freedesktop/Notifications", this, QDBusConnection::ExportAllSlots);
+        qDebug() << "[+] Registered org.freedesktop.Notifications D-Bus service successfully.";
+    } else {
+        qDebug() << "[-] Failed to register org.freedesktop.Notifications service:" << bus.lastError().message();
+    }
+}
+
+void ShellBridge::jobControl(const QString &jobId, const QString &action)
+{
+    QString act = action.trimmed().toLower();
+    if (act == "pause") {
+        JobManager::instance()->pauseJob(jobId);
+    } else if (act == "resume") {
+        JobManager::instance()->resumeJob(jobId);
+    } else if (act == "cancel") {
+        JobManager::instance()->cancelJob(jobId);
+    }
+}
+
+uint ShellBridge::Notify(const QString &app_name, uint replaces_id, const QString &app_icon, const QString &summary, const QString &body, const QStringList &actions, const QVariantMap &hints, int expire_timeout)
+{
+    Q_UNUSED(app_name)
+    Q_UNUSED(replaces_id)
+    Q_UNUSED(app_icon)
+    Q_UNUSED(actions)
+    Q_UNUSED(hints)
+    Q_UNUSED(expire_timeout)
+
+    qDebug() << "🔔 D-Bus Notification Received Summary:" << summary << "Body:" << body;
+    emit notificationReceived(summary, body);
+    return 1;
 }
 
 QString ShellBridge::currentMode() const 
@@ -35,15 +76,50 @@ void ShellBridge::executeSystemCommand(const QString &command)
 {
     QString cleanCommand = command.trimmed().toLower();
     qDebug() << "⚠️ IPC Bridge Request Received -> Action:" << cleanCommand;
+
+    if (cleanCommand.startsWith("volume:")) {
+        QString volStr = cleanCommand.mid(7);
+        bool ok;
+        int vol = volStr.toInt(&ok);
+        if (ok) {
+            qDebug() << "ShellBridge: Changing hardware audio volume to" << vol << "%";
+            QProcess::startDetached("amixer", {"set", "Master", QString::number(vol) + "%"});
+        }
+        return;
+    }
     
-    if (cleanCommand == "files") {
-        qDebug() << "ShellBridge: Launching a native background I/O copy transaction...";
-        JobManager::instance()->createDiskJob("copy", "/home/user/downloads", "/media/usb/backup");
-    } else if (cleanCommand == "settings") {
-        qDebug() << "ShellBridge: Validated 'settings' request.";
-    } else if (cleanCommand == "launcher") {
-        qDebug() << "ShellBridge: Forwarding Launcher display toggle down to the QML window layer.";
-        emit launcherToggleTriggered();
+    static const QMap<QString, QPair<QString, QString>> localApps = {
+        {"files", {"files", "Files"}},
+        {"file", {"files", "Files"}},
+        {"settings", {"settings", "Settings"}},
+        {"setting", {"settings", "Settings"}},
+        {"home", {"home", "Home Dashboard"}},
+        {"dashboard", {"home", "Home Dashboard"}}
+    };
+
+    if (localApps.contains(cleanCommand)) {
+        auto appInfo = localApps.value(cleanCommand);
+        emit launchAppRequested(appInfo.first, "", appInfo.second);
+    } else {
+        // Check if the command is a URL (starts with http/https or contains dot and no spaces)
+        bool isUrl = false;
+        QString resolvedUrl = command.trimmed();
+        if (resolvedUrl.startsWith("http://") || resolvedUrl.startsWith("https://")) {
+            isUrl = true;
+        } else if (resolvedUrl.contains(".") && !resolvedUrl.contains(" ")) {
+            isUrl = true;
+            resolvedUrl = "https://" + resolvedUrl;
+        }
+
+        if (isUrl) {
+            qDebug() << "ShellBridge: Routing URL directly as a browser tab:" << resolvedUrl;
+            emit launchAppRequested("web_" + QString::number(QDateTime::currentMSecsSinceEpoch()), resolvedUrl, command.trimmed());
+        } else {
+            // Sanitize and route to Google Gemini
+            QString encodedQuery = QString::fromUtf8(QUrl::toPercentEncoding(command));
+            QString geminiUrl = "https://gemini.google.com/app?q=" + encodedQuery;
+            emit launchAppRequested("gemini_" + QString::number(QDateTime::currentMSecsSinceEpoch()), geminiUrl, "Gemini: " + command);
+        }
     }
 }
 

@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", function() {
     initializeAnodyneIPCBridge();
-    // Default to container rootfs view
-    switchDirectory('sandbox-rootfs');
+    // Default to user home view
+    switchDirectory('user-home');
 });
+
+let activeJobId = "";
 
 // 1. Host QWebChannel Synchronization
 function initializeAnodyneIPCBridge() {
@@ -13,6 +15,11 @@ function initializeAnodyneIPCBridge() {
 
             // Connect asynchronous job progress streams
             sysContext.nativeJobProgressChanged.connect(function(jobId, progress) {
+                if (activeJobId !== jobId) {
+                    activeJobId = jobId;
+                    document.getElementById("btn-pause").classList.remove("hidden");
+                    document.getElementById("btn-resume").classList.add("hidden");
+                }
                 updateFooterTaskBar(jobId, progress);
             });
 
@@ -65,6 +72,12 @@ const fileSystemData = {
         items: [
             { name: 'SystemBackup_2026.tar.gz', type: 'Compressed Archive', size: '142.6 MB', perms: '-rw-r--r--' }
         ]
+    },
+    'recycle-bin': {
+        path: '/root/.recycle_bin/',
+        items: [
+            { name: 'old_kernel_config.bak', type: 'Backup File', size: '12 KB', perms: '-rw-r--r--' }
+        ]
     }
 };
 
@@ -79,8 +92,10 @@ function switchDirectory(key) {
     const listItems = document.querySelectorAll(".drive-list li");
     listItems.forEach(li => li.classList.remove("active"));
     
-    // Find the clicked item
-    event.currentTarget.classList.add("active");
+    const activeItem = document.getElementById("sb-" + key);
+    if (activeItem) {
+        activeItem.classList.add("active");
+    }
 
     // Populate file table rows
     const tbody = document.getElementById("files-list-body");
@@ -92,14 +107,65 @@ function switchDirectory(key) {
             tr.className = 'folder';
         }
         
+        let actionCell = "";
+        if (key !== 'recycle-bin') {
+            actionCell = `<td><button class="btn btn-danger btn-sm" onclick="deleteFile(event, '${key}', '${item.name}')">Delete</button></td>`;
+        } else {
+            actionCell = `<td><span style="color: #666; font-style: italic;">Locked</span></td>`;
+        }
+
         tr.innerHTML = `
             <td>${item.type === 'Directory' ? '📁' : '📄'} ${item.name}</td>
             <td>${item.type}</td>
             <td>${item.size}</td>
             <td><code>${item.perms}</code></td>
+            ${actionCell}
         `;
         tbody.appendChild(tr);
     });
+}
+
+function deleteFile(event, dirKey, itemName) {
+    event.stopPropagation();
+    
+    const dir = fileSystemData[dirKey];
+    const index = dir.items.findIndex(item => item.name === itemName);
+    if (index !== -1) {
+        const item = dir.items.splice(index, 1)[0];
+        
+        // Push it into recycle-bin
+        fileSystemData['recycle-bin'].items.push({
+            name: item.name + "_" + Date.now().toString().slice(-4),
+            type: item.type,
+            size: item.size,
+            perms: item.perms
+        });
+        
+        if (window.sysContext) {
+            sysContext.logWebEvent("Deleted file (moved to recycle bin): " + dir.path + itemName);
+            sysContext.executeSystemCommand("mv " + dir.path + itemName + " /root/.recycle_bin/");
+        }
+        
+        // Refresh view
+        switchDirectory(dirKey);
+    }
+}
+
+function controlJob(action) {
+    if (window.sysContext && activeJobId) {
+        sysContext.jobControl(activeJobId, action);
+        if (action === 'pause') {
+            document.getElementById("btn-pause").classList.add("hidden");
+            document.getElementById("btn-resume").classList.remove("hidden");
+            document.getElementById("footer-status-msg").textContent = "Job paused.";
+        } else if (action === 'resume') {
+            document.getElementById("btn-resume").classList.add("hidden");
+            document.getElementById("btn-pause").classList.remove("hidden");
+            document.getElementById("footer-status-msg").textContent = "Writing file blocks asynchronously...";
+        } else if (action === 'cancel') {
+            document.getElementById("footer-status-msg").textContent = "Canceling job...";
+        }
+    }
 }
 
 // 3. Asynchronous Job Trigger
@@ -124,12 +190,12 @@ function updateFooterTaskBar(jobId, progress) {
 }
 
 function completeFooterTaskBar(jobId, success, message) {
-    document.getElementById("footer-percentage-text").textContent = "✓ Finished";
+    document.getElementById("footer-percentage-text").textContent = success ? "✓ Finished" : "✗ Failed";
     document.getElementById("footer-status-msg").textContent = message;
     
     const progressFill = document.getElementById("footer-progress-fill");
     progressFill.style.width = "100%";
-    progressFill.style.backgroundColor = "#4caf50";
+    progressFill.style.backgroundColor = success ? "#4caf50" : "#f44336";
 
     // Wait and then slide the footer out of view
     setTimeout(function() {
@@ -137,5 +203,6 @@ function completeFooterTaskBar(jobId, success, message) {
         // Reset styling
         progressFill.style.width = "0%";
         progressFill.style.backgroundColor = "#007acc";
+        activeJobId = "";
     }, 3000);
 }

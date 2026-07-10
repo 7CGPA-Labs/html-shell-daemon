@@ -1,0 +1,42 @@
+# Minimal Display Engine & Core GUI Frameworks
+linux-image-amd64
+xserver-xorg-core
+xserver-xorg-video-all
+xinput
+xinit
+syslinux-common
+isolinux
+syslinux-utils
+
+# Hardware Management Utilities
+udev
+dbus
+systemd-sysv
+
+# Audio Management Layers
+alsa-utils
+pipewire
+
+# Qt 5 Runtime Modules for Anodyne Engine
+libqt5core5a
+libqt5gui5
+libqt5widgets5
+libqt5qml5
+libqt5quick5
+libqt5webengine5
+libqt5webenginecore5
+qml-module-qtquick2
+qml-module-qtquick-window2
+qml-module-qtquick-controls
+qml-module-qtquick-dialogs
+qml-module-qtwebchannel
+qml-module-qtwebengine
+qml-module-qtwebengine
+libqt5webenginewidgets5
+qml-module-qtquick-controls2
+qml-module-qtquick-layouts
+xcursor-themes
+adwaita-icon-theme
+libxcb-cursor0
+x11-xserver-utils
+fonts-noto-color-emoji

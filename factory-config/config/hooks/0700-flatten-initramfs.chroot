@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+echo "🔒 Hardening Ramdisk: Overriding compression policies to flat single-layer Gzip..."
+
+# 1. Disable early microcode concatenation (prevents multi-layer cpio archives)
+mkdir -p /etc/initramfs-tools/conf.d
+echo "EARLY_MICROCODE=no" > /etc/initramfs-tools/conf.d/disable-microcode.conf
+
+# 2. Force gzip compression policy via a drop-in override configuration file
+echo "COMPRESS=gzip" > /etc/initramfs-tools/conf.d/force-gzip.conf
+
+# 3. Modify the master configuration file as an extra safety measure
+if [ -f /etc/initramfs-tools/initramfs.conf ]; then
+    sed -i 's/COMPRESS=zstd/COMPRESS=gzip/g' /etc/initramfs-tools/initramfs.conf
+fi
+
+# 4. Re-generate the initramfs ramdisk files cleanly
+echo "🌀 Regenerating flat kernel ramdisks inside chroot..."
+update-initramfs -u -k all
+
+echo "✅ Flattened single-layer Gzip ramdisk successfully sealed."

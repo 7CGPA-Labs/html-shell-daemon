@@ -11,27 +11,27 @@
     <div class="files-app-container">
         <!-- Sidebar Navigation -->
         <aside class="files-sidebar">
-            <div class="section-title">Mount Points</div>
+            <div class="section-title">User Folders</div>
             <ul class="drive-list">
-                <li class="active" onclick="switchDirectory('system-root')">
-                    <span class="icon">🔒</span>
-                    <span class="label">dm-verity Root (/)</span>
-                </li>
-                <li onclick="switchDirectory('user-home')">
+                <li id="sb-user-home" class="active" onclick="switchDirectory('user-home')">
                     <span class="icon">🔑</span>
                     <span class="label">tpm-luks User (/home)</span>
-                </li>
-                <li onclick="switchDirectory('sandbox-rootfs')">
-                    <span class="icon">📦</span>
-                    <span class="label">Container userland (/var/lib/anodyne/rootfs)</span>
                 </li>
             </ul>
 
             <div class="section-title">Devices</div>
             <ul class="drive-list">
-                <li onclick="switchDirectory('external-usb')">
+                <li id="sb-external-usb" onclick="switchDirectory('external-usb')">
                     <span class="icon">🔌</span>
                     <span class="label">External USB Backup</span>
+                </li>
+            </ul>
+
+            <div class="section-title">Trash</div>
+            <ul class="drive-list">
+                <li id="sb-recycle-bin" onclick="switchDirectory('recycle-bin')">
+                    <span class="icon">🗑️</span>
+                    <span class="label">Recycle Bin</span>
                 </li>
             </ul>
         </aside>
@@ -57,6 +57,7 @@
                             <th>Type</th>
                             <th>Size</th>
                             <th>Permissions</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="files-list-body">
@@ -74,9 +75,16 @@
                 <div class="footer-progress-track">
                     <div id="footer-progress-fill" class="footer-progress-fill" style="width: 0%"></div>
                 </div>
-                <div class="footer-status-row">
-                    <span id="footer-percentage-text">0% Completed</span>
-                    <span id="footer-status-msg">Executing File Worker...</span>
+                <div class="footer-status-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div>
+                        <span id="footer-percentage-text">0% Completed</span>
+                        <span id="footer-status-msg" style="margin-left: 10px;">Executing File Worker...</span>
+                    </div>
+                    <div class="job-controls">
+                        <button id="btn-pause" class="btn btn-secondary btn-sm" onclick="controlJob('pause')">Pause</button>
+                        <button id="btn-resume" class="btn btn-secondary btn-sm hidden" onclick="controlJob('resume')">Resume</button>
+                        <button id="btn-cancel" class="btn btn-danger btn-sm" onclick="controlJob('cancel')">Cancel</button>
+                    </div>
                 </div>
             </footer>
         </main>

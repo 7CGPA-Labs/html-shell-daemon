@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+echo "🔧 Adjusting SysV init configuration for Anodyne OS Kiosk..."
+
+# Comment out default getty on tty1
+if grep -q "1:2345:respawn:/sbin/getty" /etc/inittab; then
+    sed -i 's/^1:2345:respawn:\/sbin\/getty/#1:2345:respawn:\/sbin\/getty/g' /etc/inittab
+fi
+
+# Append custom kiosk entry
+if ! grep -q "anodyne-kiosk-start.sh" /etc/inittab; then
+    echo "" >> /etc/inittab
+    echo "# Anodyne OS Graphic Kiosk Interface Runtime" >> /etc/inittab
+    echo "x1:2345:respawn:/usr/bin/xinit /usr/bin/anodyne-kiosk-start.sh -- :0 -quiet" >> /etc/inittab
+fi
+
+echo "✅ SysV init configured successfully."
