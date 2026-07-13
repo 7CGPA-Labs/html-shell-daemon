@@ -35,13 +35,20 @@ jobs:
             qml-module-qtwebengine \
             libqt5dbus5 \
             live-build \
-            debootstrap \
-            debian-archive-keyring \
             isolinux \
             syslinux-common \
             xorriso \
             qemu-system-x86 \
             shellcheck
+
+      - name: Install Latest Debian Keyring and Debootstrap
+        run: |
+          echo "[*] Downloading latest debootstrap..."
+          curl -sLO http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_1.0.134ubuntu1_all.deb
+          echo "[*] Downloading latest debian-archive-keyring..."
+          curl -sLO https://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/debian-archive-keyring_2025.1_all.deb
+          echo "[*] Installing packages..."
+          sudo dpkg -i debootstrap_1.0.134ubuntu1_all.deb debian-archive-keyring_2025.1_all.deb
 
       - name: Verify Setup Scripts Syntax
         run: |
