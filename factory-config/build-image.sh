@@ -17,7 +17,7 @@ echo "📦 Step 1: Staging native application payloads..."
 mkdir -p config/includes.chroot/usr/bin/web-apps
 cp -f "$SOURCE_DIR/AnodyneOS" config/includes.chroot/usr/bin/
 cp -rf "$SOURCE_DIR/web-apps/"* config/includes.chroot/usr/bin/web-apps/
-cp -f "$SOURCE_DIR/scripts/"* config/includes.chroot/usr/bin/
+find "$SOURCE_DIR/scripts/" -maxdepth 1 -type f -exec cp -f {} config/includes.chroot/usr/bin/ \;
 
 echo "🛠️ Step 2: Harvesting host bootloaders and staging configuration map..."
 mkdir -p config/bootloaders/isolinux
