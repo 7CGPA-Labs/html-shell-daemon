@@ -38,11 +38,12 @@ fi
 echo "[*] Launching emulator in background..."
 # Boot the CD-ROM ISO with redirected serial output to our log file, without graphical display windows
 qemu-system-x86_64 \
+    -cpu max \
     $KVM_FLAG \
     -m 2048 \
     -cdrom "$ISO_PATH" \
     -display none \
-    -serial file:"$LOG_FILE" &
+    -serial stdio > "$LOG_FILE" 2>&1 &
 
 QEMU_PID=$!
 
