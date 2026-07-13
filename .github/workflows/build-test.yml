@@ -75,6 +75,13 @@ jobs:
           export SOURCE_DIR=".."
           sudo -E ./build-image.sh
 
+      - name: Upload ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anodyne-os-iso
+          path: ./factory/binary.hybrid.iso
+          if-no-files-found: error
+
       - name: Run QEMU Headless Integration Test
         run: |
           echo "[*] Executing QEMU smoke test..."
