@@ -107,7 +107,7 @@ LB_JFFS2_ERASEBLOCK=""
 
 # $LB_MEMTEST: set memtest
 # (Default: memtest86+)
-LB_MEMTEST="memtest86+"
+LB_MEMTEST="none"
 
 # $LB_WIN32_LOADER: set win32-loader
 # (Default: false)
