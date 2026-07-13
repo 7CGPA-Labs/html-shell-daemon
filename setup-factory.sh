@@ -66,6 +66,7 @@ chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/setup-zram.sh"
 chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/setup-luks-tpm.sh"
 chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/setup-dm-verity.sh"
 chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/setup-network-routing.sh"
+chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/setup-chameleon.sh"
 chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/ipc-bridge-daemon.py"
 chmod +x "$WORKSPACE/config/includes.chroot/etc/cron.daily/anodyne-housekeeper"
 

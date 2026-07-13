@@ -1,0 +1,7 @@
+# ==============================================================================
+# Anodyne OS - Chameleon Input hotplug rules
+# ==============================================================================
+# Re-runs setup-chameleon.sh to update UI scaling factor on any device hotplug.
+# ==============================================================================
+
+ACTION=="add|remove", SUBSYSTEM=="input", RUN+="/usr/bin/setup-chameleon.sh"

@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -e 
 
-SOURCE_DIR="../WebOS-Appliance"
+SOURCE_DIR="${SOURCE_DIR:-../WebOS-Appliance}"
 FACTORY_DIR=$(pwd)
 
 echo "===================================================="

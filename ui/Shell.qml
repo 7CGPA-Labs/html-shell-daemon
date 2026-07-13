@@ -15,8 +15,13 @@ Window {
     flags: Qt.FramelessWindowHint
 
     property bool sidebarOpen: false
-    property real uiScaleMultiplier: 1.0
+    property real uiScaleMultiplier: nativeSystemBridge.touchscreenDetected ? 1.2 : 1.0
     property int volumeLevel: 80
+    property bool isLocked: false
+
+    onUiScaleMultiplierChanged: {
+        updateActiveWebScale();
+    }
 
     ListModel {
         id: notificationModel
@@ -34,10 +39,6 @@ Window {
         
         function onLauncherToggleTriggered() {
             appDrawer.open = !appDrawer.open;
-        }
-
-        function onLaunchAppRequested(appId, url, title) {
-            launchOrSwitchApp(appId, url, title);
         }
 
         function onNotificationReceived(title, body) {
@@ -88,6 +89,9 @@ Window {
         onSidebarToggleRequested: {
             sidebarOpen = !sidebarOpen
         }
+        onLockRequested: {
+            root.isLocked = true
+        }
     }
 
     // 3. Tabbed Multitasking Bar
@@ -109,7 +113,7 @@ Window {
             id: tabListView
             anchors.fill: parent
             orientation: ListView.Horizontal
-            model: tabModel
+            model: nativeSystemBridge.tabs
             boundsBehavior: Flickable.StopAtBounds
             
             delegate: Rectangle {
@@ -122,7 +126,7 @@ Window {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        currentTabIndex = index
+                        nativeSystemBridge.currentTabIndex = index
                     }
                 }
 
@@ -144,7 +148,7 @@ Window {
 
                     Text {
                         Layout.fillWidth: true
-                        text: model.title
+                        text: modelData.title
                         color: index === currentTabIndex ? appTheme.textPrimary : appTheme.textSecondary
                         font.pixelSize: 12
                         font.weight: index === currentTabIndex ? Font.Medium : Font.Normal
@@ -157,7 +161,7 @@ Window {
                         Layout.preferredHeight: 16
                         radius: 8
                         color: closeMa.containsMouse ? "#2d2d2d" : "transparent"
-                        visible: model.appId !== "home" // Home tab cannot be closed
+                        visible: modelData.appId !== "home" // Home tab cannot be closed
 
                         Text {
                             anchors.centerIn: parent
@@ -189,16 +193,16 @@ Window {
         width: parent.width
 
         Repeater {
-            model: tabModel
+            model: nativeSystemBridge.tabs
             delegate: WebEngineView {
                 anchors.fill: parent
                 visible: index === currentTabIndex
                 webChannel: shellIPCChannel
-                url: model.url
+                url: modelData.url
 
                 onLoadingChanged: {
                     if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
-                        console.log("System Shell Context mounted web asset successfully: " + model.url)
+                        console.log("System Shell Context mounted web asset successfully: " + modelData.url)
                     }
                 }
             }
@@ -301,65 +305,22 @@ Window {
         }
     }
 
-    // Tab switcher & App Registry controllers
-    property int currentTabIndex: 0
-
-    ListModel {
-        id: tabModel
-    }
-
-    Component.onCompleted: {
-        // Register the primary Home Dashboard
-        tabModel.append({
-            "appId": "home",
-            "title": "Home Dashboard",
-            "url": "file://" + applicationDirPath + "/web-apps/homepage/index.html"
-        })
-    }
+    // Tab switcher & App Registry controllers mapped directly to native C++ model
+    readonly property int currentTabIndex: nativeSystemBridge.currentTabIndex
 
     function launchOrSwitchApp(appId, url, title) {
-        var resolvedUrl = url;
-        if (appId === "files") {
-            resolvedUrl = "file://" + applicationDirPath + "/web-apps/files/index.html";
-        } else if (appId === "settings") {
-            resolvedUrl = "file://" + applicationDirPath + "/web-apps/settings/index.html";
-        } else if (appId === "home") {
-            resolvedUrl = "file://" + applicationDirPath + "/web-apps/homepage/index.html";
-        }
-
-        // If the PWA is already open, just focus the tab
-        for (var i = 0; i < tabModel.count; i++) {
-            if (tabModel.get(i).appId === appId) {
-                currentTabIndex = i;
-                appDrawer.open = false;
-                return;
-            }
-        }
-
-        // Open as a new tab
-        tabModel.append({
-            "appId": appId,
-            "title": title,
-            "url": resolvedUrl
-        });
-        currentTabIndex = tabModel.count - 1;
+        autoLockTimer.restart();
+        nativeSystemBridge.launchOrSwitchApp(appId, url, title);
         appDrawer.open = false;
     }
 
     function closeTab(index) {
-        if (index === 0) return; // Prevent closing the home tab
-        
-        var selectedTabWasClosed = (index === currentTabIndex);
-        tabModel.remove(index);
-        
-        if (selectedTabWasClosed) {
-            currentTabIndex = Math.max(0, index - 1);
-        } else if (currentTabIndex > index) {
-            currentTabIndex--;
-        }
+        autoLockTimer.restart();
+        nativeSystemBridge.closeTab(index);
     }
 
     function routeCommand(input) {
+        autoLockTimer.restart();
         nativeSystemBridge.executeSystemCommand(input);
     }
 
@@ -407,16 +368,17 @@ Window {
         // Timer that only runs when the sidebar is open to preserve 0% CPU consumption during idle
         Timer {
             id: diagnosticsTimer
-            interval: 2000
+            interval: 4000
             running: sidebarOpen
             repeat: true
             triggeredOnStart: true
             onTriggered: {
-                cpuUsageText.text = "CPU Usage: " + Math.floor(Math.random() * 15 + 5) + "%"
-                ramUsageText.text = "RAM usage: 1.4 GB / 2.0 GB"
-                zramSizeText.text = "zRAM Size: " + nativeSystemBridge.getZramDiskSize()
-                zramAlgoText.text = "zRAM Algo: " + nativeSystemBridge.getZramAlgorithm()
-                swappinessText.text = "Swappiness: " + nativeSystemBridge.getSystemSwappiness()
+                cpuUsageText.text = "CPU Load: " + nativeSystemBridge.getCpuUsage()
+                ramUsageText.text = "Memory Status: " + nativeSystemBridge.getRamUsage()
+                zramSizeText.text = "Storage Health: " + nativeSystemBridge.getStorageStatus()
+                zramAlgoText.text = "System Core: " + nativeSystemBridge.getSystemCore()
+                swappinessText.text = "zRAM Space: " + nativeSystemBridge.getZramDiskSize()
+                touchscreenStatusText.text = "Input Mode: " + (nativeSystemBridge.touchscreenDetected ? "Tablet / Touch" : "Precision / Desktop")
             }
         }
 
@@ -444,7 +406,7 @@ Window {
                 spacing: 8
 
                 Text {
-                    text: qsTr("MEMORY / VIRTUALIZATION")
+                    text: qsTr("SYSTEM HEALTH STATUS")
                     color: appTheme.textMuted
                     font.pixelSize: 10
                     font.weight: Font.Bold
@@ -455,6 +417,7 @@ Window {
                 Text { id: zramSizeText; color: appTheme.textPrimary; font.pixelSize: 12 }
                 Text { id: zramAlgoText; color: appTheme.textPrimary; font.pixelSize: 12 }
                 Text { id: swappinessText; color: appTheme.textPrimary; font.pixelSize: 12 }
+                Text { id: touchscreenStatusText; color: appTheme.textPrimary; font.pixelSize: 12 }
             }
 
             Rectangle {
@@ -582,6 +545,22 @@ Window {
                     }
                 }
             }
+        }
+    }
+
+    LockScreen {
+        id: lockScreen
+        isLocked: root.isLocked
+        onUnlocked: root.isLocked = false
+    }
+
+    Timer {
+        id: autoLockTimer
+        interval: 600000
+        running: !root.isLocked
+        repeat: false
+        onTriggered: {
+            root.isLocked = true
         }
     }
 }

@@ -1,0 +1,79 @@
+name: Build and Test Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build OS Image & QEMU Smoke Test
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Qt 5 and System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            qtbase5-dev \
+            qtdeclarative5-dev \
+            qtwebengine5-dev \
+            qml-module-qtquick2 \
+            qml-module-qtquick-window2 \
+            qml-module-qtquick-layouts \
+            qml-module-qtquick-controls2 \
+            qml-module-qtquick-dialogs \
+            qml-module-qtwebchannel \
+            qml-module-qtwebengine \
+            libqt5dbus5 \
+            live-build \
+            isolinux \
+            syslinux-common \
+            xorriso \
+            qemu-system-x86 \
+            shellcheck
+
+      - name: Verify Setup Scripts Syntax
+        run: |
+          echo "[*] Checking bash scripts syntax..."
+          for f in scripts/*.sh setup-factory.sh; do
+            echo "Checking $f..."
+            bash -n "$f"
+          done
+          echo "[*] Running shellcheck on scripts..."
+          shellcheck scripts/*.sh setup-factory.sh || echo "⚠️ Shellcheck reported minor warnings"
+
+      - name: Verify Python Script Syntax
+        run: |
+          echo "[*] Checking Python scripts syntax..."
+          python3 -m py_compile scripts/ipc-bridge-daemon.py
+
+      - name: Compile C++ Shell Core
+        run: |
+          echo "[*] Compiling Shell Core..."
+          qmake AnodyneOS.pro
+          make -j$(nproc)
+          if [ ! -f AnodyneOS ]; then
+            echo "❌ ERROR: Compilation failed! AnodyneOS binary not found."
+            exit 1
+          fi
+
+      - name: Stage Factory and Build ISO
+        run: |
+          echo "[*] Staging Factory Builder..."
+          ./setup-factory.sh ./factory
+          cd ./factory
+          echo "[*] Compiling bootable SquashFS ISO..."
+          # Set SOURCE_DIR to root of checkout and pass environment variables down through sudo
+          export SOURCE_DIR=".."
+          sudo -E ./build-image.sh
+
+      - name: Run QEMU Headless Integration Test
+        run: |
+          echo "[*] Executing QEMU smoke test..."
+          ./scripts/run-qemu-ci-test.sh ./factory/binary.hybrid.iso

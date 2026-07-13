@@ -119,9 +119,9 @@ Item {
                             theme: root.theme
                             label: title
                             subtitle: subtitle
-                            property string localAppId: model ? model.appId : ""
-                            property string localUrl: model ? model.url : ""
-                            property string localTitle: model ? model.title : ""
+                            property string localAppId: model.appId
+                            property string localUrl: model.url
+                            property string localTitle: model.title
                             onClicked: root.appLaunched(localAppId, localUrl, localTitle)
                         }
                     }
@@ -155,9 +155,9 @@ Item {
                             theme: root.theme
                             label: title
                             subtitle: subtitle
-                            property string localAppId: model ? model.appId : ""
-                            property string localUrl: model ? model.url : ""
-                            property string localTitle: model ? model.title : ""
+                            property string localAppId: model.appId
+                            property string localUrl: model.url
+                            property string localTitle: model.title
                             onClicked: {
                                 if (localAppId === "diagnostics") {
                                     root.closed();

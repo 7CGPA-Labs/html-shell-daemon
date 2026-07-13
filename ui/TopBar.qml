@@ -9,6 +9,7 @@ Rectangle {
 
     signal drawerToggleRequested()
     signal sidebarToggleRequested()
+    signal lockRequested()
 
     property bool drawerOpen: false
     property string calendarSummary: qsTr("No upcoming events")
@@ -141,6 +142,21 @@ Rectangle {
                 theme: root.theme
                 iconSource: theme.iconBattery
                 label: powerStatus
+            }
+
+            // Lock Screen Button
+            Text {
+                text: "🔒"
+                color: theme.textSecondary
+                font.pixelSize: 13
+                Layout.alignment: Qt.AlignVCenter
+                opacity: lockMa.containsMouse ? 0.7 : 1.0
+                MouseArea {
+                    id: lockMa
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: root.lockRequested()
+                }
             }
 
             // macOS Notification/Control Center icon
