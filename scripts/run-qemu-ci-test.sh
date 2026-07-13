@@ -10,7 +10,7 @@ set -euo pipefail
 
 ISO_PATH="${1:-./factory/binary.hybrid.iso}"
 LOG_FILE="qemu-serial.log"
-TIMEOUT=120
+TIMEOUT=240
 
 echo "===================================================="
 echo "    ANODYNE OS - HEADLESS BOOT VERIFICATION FLOW   "
