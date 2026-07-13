@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: write
+
 jobs:
   build-and-test:
     name: Build OS Image & QEMU Smoke Test
@@ -71,9 +74,8 @@ jobs:
           ./setup-factory.sh ./factory
           cd ./factory
           echo "[*] Compiling bootable SquashFS ISO..."
-          # Set SOURCE_DIR to root of checkout and pass environment variables down through sudo
           export SOURCE_DIR=".."
-          sudo -E ./build-image.sh
+          sudo -E ./build-image.sh 2>&1 | tee build.log
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
@@ -86,3 +88,16 @@ jobs:
         run: |
           echo "[*] Executing QEMU smoke test..."
           ./scripts/run-qemu-ci-test.sh ./factory/binary.hybrid.iso
+
+      - name: Push Logs on Failure
+        if: failure()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          # Create and switch to a clean branch, copying the build log from the checkout
+          git checkout -b ci-logs || (git checkout ci-logs && git reset --hard origin/main)
+          cp ./factory/build.log . || true
+          git add build.log || true
+          git commit -m "ci: upload build logs [skip ci]" || true
+          git push origin ci-logs --force
