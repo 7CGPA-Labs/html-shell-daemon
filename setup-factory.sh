@@ -39,7 +39,7 @@ cp -f factory-config/config/binary "$WORKSPACE/config/"
 cp -f factory-config/config/source "$WORKSPACE/config/"
 cp -f factory-config/config/bootloaders/isolinux/isolinux.cfg "$WORKSPACE/config/bootloaders/isolinux/"
 cp -f factory-config/config/package-lists/appliance-core.list.chroot "$WORKSPACE/config/package-lists/"
-cp -f factory-config/config/hooks/*.chroot "$WORKSPACE/config/hooks/"
+cp -f factory-config/config/hooks/* "$WORKSPACE/config/hooks/"
 
 # Copy system service definitions
 cp -f factory-config/config/includes.chroot/etc/systemd/system/anodyne-kiosk.service "$WORKSPACE/config/includes.chroot/etc/systemd/system/"
@@ -69,6 +69,7 @@ chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/setup-network-routing.sh"
 chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/setup-chameleon.sh"
 chmod +x "$WORKSPACE/config/includes.chroot/usr/bin/ipc-bridge-daemon.py"
 chmod +x "$WORKSPACE/config/includes.chroot/etc/cron.daily/anodyne-housekeeper"
+chmod +x "$WORKSPACE/config/hooks/"*
 
 echo "===================================================="
 echo "[+] SUCCESS: Factory workspace is successfully staged."

@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+echo "===================================================="
+echo "    BINARY HOOK: STAGING KERNEL & INITRD PAYLOADS  "
+echo "===================================================="
+mkdir -p binary/live
+cp -f chroot/boot/vmlinuz-* binary/live/vmlinuz-6.1.0-47-amd64
+cp -f chroot/boot/initrd.img-* binary/live/initrd.img-6.1.0-47-amd64
+echo "[+] Kernel and initrd payloads successfully staged into binary/live/"
+echo "===================================================="
