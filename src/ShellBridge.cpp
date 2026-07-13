@@ -336,7 +336,7 @@ QString ShellBridge::getSystemCore()
 
 bool ShellBridge::touchscreenDetected() const
 {
-    return QFile::exists("/tmp/touchscreen_detected");
+    return false; // QFile::exists("/tmp/touchscreen_detected");
 }
 
 void ShellBridge::handleTouchScreenFlagChanged()

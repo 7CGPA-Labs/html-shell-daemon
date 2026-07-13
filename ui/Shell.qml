@@ -15,7 +15,7 @@ Window {
     flags: Qt.FramelessWindowHint
 
     property bool sidebarOpen: false
-    property real uiScaleMultiplier: nativeSystemBridge.touchscreenDetected ? 1.2 : 1.0
+    property real uiScaleMultiplier: 1.0 // nativeSystemBridge.touchscreenDetected ? 1.2 : 1.0
     property int volumeLevel: 80
     property bool isLocked: false
 

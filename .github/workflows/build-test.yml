@@ -32,6 +32,8 @@ jobs:
             qml-module-qtwebengine \
             libqt5dbus5 \
             live-build \
+            debootstrap \
+            debian-archive-keyring \
             isolinux \
             syslinux-common \
             xorriso \
