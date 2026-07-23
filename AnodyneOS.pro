@@ -1,13 +1,15 @@
-QT += core gui quick webengine webchannel dbus
+QT += core gui quick webengine webenginewidgets webchannel dbus
 
 CONFIG += c++17
 
 SOURCES += src/main.cpp \
            src/ShellBridge.cpp \
-           src/JobManager.cpp
+           src/JobManager.cpp \
+           src/AnodyneUrlSchemeHandler.cpp
 
 HEADERS += src/ShellBridge.h \
-           src/JobManager.h
+           src/JobManager.h \
+           src/AnodyneUrlSchemeHandler.h
 
 RESOURCES += ui/qml.qrc
 

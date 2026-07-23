@@ -44,7 +44,7 @@ Item {
     Image {
         id: bgImage
         anchors.fill: parent
-        source: "file://" + applicationDirPath + "/web-apps/homepage/momentum_bg.jpg"
+        source: "anodyne://homepage/momentum_bg.jpg"
         fillMode: Image.PreserveAspectCrop
 
         // Dark glassmorphic backdrop overlay

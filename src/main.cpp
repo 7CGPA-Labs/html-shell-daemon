@@ -2,10 +2,25 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtWebEngine/qtwebengineglobal.h>
+#include <QWebEngineUrlScheme>
+#include <QWebEngineProfile>
+#include <QDir>
 #include "ShellBridge.h"
 #include "JobManager.h"
+#include "AnodyneUrlSchemeHandler.h"
 
 int main(int argc, char *argv[]) {
+    // Enable multi-threaded SharedArrayBuffer and disable CORS for local secure custom schemes
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--enable-features=SharedArrayBuffer --disable-web-security");
+
+    // Register custom secure URL scheme BEFORE creating QGuiApplication
+    QWebEngineUrlScheme scheme("anodyne");
+    scheme.setFlags(QWebEngineUrlScheme::SecureScheme |
+                    QWebEngineUrlScheme::LocalScheme |
+                    QWebEngineUrlScheme::LocalAccessAllowed |
+                    QWebEngineUrlScheme::CorsEnabled);
+    QWebEngineUrlScheme::registerScheme(scheme);
+
     // 1. FIX: Set attributes BEFORE creating QGuiApplication
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts); // Fixes OpenGL Context warning
@@ -14,6 +29,17 @@ int main(int argc, char *argv[]) {
     QtWebEngine::initialize(); // Fixes the initialization order warning
 
     QGuiApplication app(argc, argv);
+
+    // Configure persistent profiles on the writeable home partition
+    QWebEngineProfile *defaultProfile = QWebEngineProfile::defaultProfile();
+    QString profilePath = QDir::homePath() + "/.config/anodyne/profile";
+    QString cachePath = QDir::homePath() + "/.config/anodyne/cache";
+    defaultProfile->setPersistentStoragePath(profilePath);
+    defaultProfile->setCachePath(cachePath);
+
+    // Install scheme handler
+    AnodyneUrlSchemeHandler *handler = new AnodyneUrlSchemeHandler(&app);
+    defaultProfile->installUrlSchemeHandler("anodyne", handler);
     QQmlApplicationEngine engine;
 
     // Instantiate core controllers

@@ -32,7 +32,7 @@ ShellBridge::ShellBridge(QObject *parent)
     QVariantMap homeTab;
     homeTab["appId"] = "home";
     homeTab["title"] = "Home Dashboard";
-    homeTab["url"] = "file://" + QCoreApplication::applicationDirPath() + "/web-apps/homepage/index.html";
+    homeTab["url"] = "anodyne://homepage/index.html";
     m_tabs.append(homeTab);
 
     // Register this application as the Freedesktop Notification daemon
@@ -108,11 +108,11 @@ void ShellBridge::launchOrSwitchApp(const QString &appId, const QString &url, co
     QString resolvedUrl = url;
     QString appPath = QCoreApplication::applicationDirPath();
     if (appId == "files") {
-        resolvedUrl = "file://" + appPath + "/web-apps/files/index.html";
+        resolvedUrl = "anodyne://files/index.html";
     } else if (appId == "settings") {
-        resolvedUrl = "file://" + appPath + "/web-apps/settings/index.html";
+        resolvedUrl = "anodyne://settings/index.html";
     } else if (appId == "home") {
-        resolvedUrl = "file://" + appPath + "/web-apps/homepage/index.html";
+        resolvedUrl = "anodyne://homepage/index.html";
     }
 
     // If already open, switch focus
