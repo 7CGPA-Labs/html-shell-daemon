@@ -10,8 +10,8 @@
 #include "AnodyneUrlSchemeHandler.h"
 
 int main(int argc, char *argv[]) {
-    // Enable multi-threaded SharedArrayBuffer and disable CORS for local secure custom schemes
-    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--enable-features=SharedArrayBuffer --disable-web-security");
+    // Enable multi-threaded SharedArrayBuffer, disable CORS, and allow running as root user
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--enable-features=SharedArrayBuffer --disable-web-security --no-sandbox");
 
     // Register custom secure URL scheme BEFORE creating QGuiApplication
     QWebEngineUrlScheme scheme("anodyne");
