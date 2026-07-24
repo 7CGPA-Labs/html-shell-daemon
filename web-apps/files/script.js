@@ -1,5 +1,11 @@
+let hashWorker = null;
+let selectedFileData = null;
+let selectedFileName = "";
+
 document.addEventListener("DOMContentLoaded", function() {
     initializeAnodyneIPCBridge();
+    initializeHashWorker();
+    initializeDragAndDrop();
     // Default to user home view
     switchDirectory('user-home');
 });
@@ -107,6 +113,10 @@ function switchDirectory(key) {
             tr.className = 'folder';
         }
         
+        tr.onclick = function() {
+            selectVirtualFile(item.name, item.type, item.size, item.perms);
+        };
+        
         let actionCell = "";
         if (key !== 'recycle-bin') {
             actionCell = `<td><button class="btn btn-danger btn-sm" onclick="deleteFile(event, '${key}', '${item.name}')">Delete</button></td>`;
@@ -205,4 +215,160 @@ function completeFooterTaskBar(jobId, success, message) {
         progressFill.style.backgroundColor = "#007acc";
         activeJobId = "";
     }, 3000);
+}
+
+// 5. WASM Checksum Hashing & Drag-and-Drop Analysis
+function initializeHashWorker() {
+    const statusEl = document.getElementById("hash-status");
+    if (!statusEl) return;
+    
+    try {
+        hashWorker = new Worker("hash_worker.js");
+        hashWorker.onmessage = function(event) {
+            const data = event.data;
+            if (data.status === "ready") {
+                statusEl.textContent = "✓ WASM engine active";
+                statusEl.style.color = "#4caf50";
+            } else if (data.status === "success") {
+                statusEl.textContent = "✓ Calculation complete";
+                statusEl.style.color = "#4caf50";
+                
+                document.getElementById("hash-result-box").classList.remove("hidden");
+                document.getElementById("hash-value").value = data.hash;
+                document.getElementById("hash-duration-val").textContent = data.duration;
+                document.getElementById("btn-calculate-hash").disabled = false;
+            } else if (data.status === "error") {
+                statusEl.textContent = "❌ Initialization error";
+                statusEl.style.color = "#f44336";
+                console.error(data.error);
+            }
+        };
+        hashWorker.onerror = function(err) {
+            statusEl.textContent = "❌ Load error";
+            statusEl.style.color = "#f44336";
+            console.error(err);
+        };
+    } catch (e) {
+        statusEl.textContent = "❌ Web Workers unsupported";
+        statusEl.style.color = "#f44336";
+        console.error(e);
+    }
+}
+
+function selectVirtualFile(name, type, size, perms) {
+    document.getElementById("details-empty-state").classList.add("hidden");
+    document.getElementById("details-active-state").classList.remove("hidden");
+    
+    document.getElementById("detail-name").textContent = name;
+    document.getElementById("detail-type").textContent = type;
+    document.getElementById("detail-size").textContent = size;
+    document.getElementById("detail-perms").firstElementChild.textContent = perms;
+    
+    // Hide previous hash results
+    document.getElementById("hash-result-box").classList.add("hidden");
+    document.getElementById("hash-value").value = "";
+    
+    const calcBtn = document.getElementById("btn-calculate-hash");
+    const statusEl = document.getElementById("hash-status");
+    
+    if (type === "Directory") {
+        calcBtn.disabled = true;
+        calcBtn.style.opacity = 0.5;
+        statusEl.textContent = "Cannot compute checksum for directory";
+        statusEl.style.color = "#a0a0a0";
+        selectedFileData = null;
+    } else {
+        calcBtn.disabled = false;
+        calcBtn.style.opacity = 1;
+        statusEl.textContent = "Ready to hash virtual payload";
+        statusEl.style.color = "#ffcc00";
+        
+        // Generate mock binary contents for virtual files based on name/size
+        const mockContent = `Anodyne OS Mock File Payload for: ${name} (${size}) permissions: ${perms}`;
+        const encoder = new TextEncoder();
+        selectedFileData = encoder.encode(mockContent).buffer;
+        selectedFileName = name;
+    }
+}
+
+function initializeDragAndDrop() {
+    const dropzone = document.getElementById("details-sidebar");
+    const emptyState = document.getElementById("details-empty-state");
+    
+    if (!dropzone) return;
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            emptyState.classList.add("dragover");
+        }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            emptyState.classList.remove("dragover");
+        }, false);
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+            handleDroppedFile(files[0]);
+        }
+    }, false);
+}
+
+function handleDroppedFile(file) {
+    document.getElementById("details-empty-state").classList.add("hidden");
+    document.getElementById("details-active-state").classList.remove("hidden");
+    
+    document.getElementById("detail-name").textContent = file.name;
+    document.getElementById("detail-type").textContent = file.type || "Local File";
+    
+    let sizeStr = "";
+    if (file.size < 1024) sizeStr = file.size + " B";
+    else if (file.size < 1024 * 1024) sizeStr = (file.size / 1024).toFixed(1) + " KB";
+    else sizeStr = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+    
+    document.getElementById("detail-size").textContent = sizeStr;
+    document.getElementById("detail-perms").firstElementChild.textContent = "-rw-r--r-- (local)";
+    
+    document.getElementById("hash-result-box").classList.add("hidden");
+    document.getElementById("hash-value").value = "";
+    
+    const calcBtn = document.getElementById("btn-calculate-hash");
+    const statusEl = document.getElementById("hash-status");
+    
+    calcBtn.disabled = true;
+    statusEl.textContent = "Reading local file...";
+    statusEl.style.color = "#ffcc00";
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        selectedFileData = e.target.result;
+        selectedFileName = file.name;
+        calcBtn.disabled = false;
+        statusEl.textContent = "Ready to hash local file";
+        statusEl.style.color = "#ffcc00";
+    };
+    reader.onerror = function() {
+        statusEl.textContent = "❌ Failed to read file";
+        statusEl.style.color = "#f44336";
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function calculateFileHash() {
+    if (!hashWorker || !selectedFileData) return;
+    
+    const statusEl = document.getElementById("hash-status");
+    statusEl.textContent = "⚡ Computing SHA-256 in background worker...";
+    statusEl.style.color = "#ffcc00";
+    document.getElementById("btn-calculate-hash").disabled = true;
+    
+    hashWorker.postMessage({ fileData: selectedFileData });
 }
