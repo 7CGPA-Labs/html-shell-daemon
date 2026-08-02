@@ -15,7 +15,7 @@ Window {
     flags: Qt.FramelessWindowHint
 
     property bool sidebarOpen: false
-    property real uiScaleMultiplier: 1.0 // nativeSystemBridge.touchscreenDetected ? 1.2 : 1.0
+    property real uiScaleMultiplier: 1.0
     property int volumeLevel: 80
     property bool isLocked: false
 
@@ -89,7 +89,6 @@ Window {
         anchors.top: parent.top
         width: parent.width
         drawerOpen: appDrawer.open
-        inputModeHint: uiScaleMultiplier > 1.0 ? "Touch" : ""
         onDrawerToggleRequested: {
             appDrawer.open = !appDrawer.open
         }
@@ -356,18 +355,7 @@ Window {
         nativeSystemBridge.executeSystemCommand(input);
     }
 
-    // Touch Event Area for Dynamic Scaling (+20% size on touch interaction)
-    MultiPointTouchArea {
-        anchors.fill: parent
-        mouseEnabled: false // Let mouse events propagate normally
-        onTouchUpdated: {
-            if (uiScaleMultiplier === 1.0) {
-                uiScaleMultiplier = 1.2;
-                nativeSystemBridge.logWebEvent("Touch device activity detected. Expanding UI scaling by 20%.");
-                updateActiveWebScale();
-            }
-        }
-    }
+
 
     function updateActiveWebScale() {
         var scaleValue = uiScaleMultiplier;
@@ -410,7 +398,7 @@ Window {
                 zramSizeText.text = "Storage Health: " + nativeSystemBridge.getStorageStatus()
                 zramAlgoText.text = "System Core: " + nativeSystemBridge.getSystemCore()
                 swappinessText.text = "zRAM Space: " + nativeSystemBridge.getZramDiskSize()
-                touchscreenStatusText.text = "Input Mode: " + (nativeSystemBridge.touchscreenDetected ? "Tablet / Touch" : "Precision / Desktop")
+                inputModeText.text = "Input Mode: Precision / Desktop"
             }
         }
 
@@ -449,7 +437,7 @@ Window {
                 Text { id: zramSizeText; color: appTheme.textPrimary; font.pixelSize: 12 }
                 Text { id: zramAlgoText; color: appTheme.textPrimary; font.pixelSize: 12 }
                 Text { id: swappinessText; color: appTheme.textPrimary; font.pixelSize: 12 }
-                Text { id: touchscreenStatusText; color: appTheme.textPrimary; font.pixelSize: 12 }
+                Text { id: inputModeText; color: appTheme.textPrimary; font.pixelSize: 12 }
             }
 
             Rectangle {

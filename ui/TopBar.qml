@@ -19,7 +19,6 @@ Rectangle {
     property string statusBadgeText: ""
     property string networkStatus: qsTr("WiFi")
     property string powerStatus: qsTr("100%")
-    property string inputModeHint: ""
 
     height: theme.barHeight
     color: theme.barBackground
@@ -141,23 +140,7 @@ Rectangle {
         RowLayout {
             spacing: 12
 
-            RowLayout {
-                visible: inputModeHint.length > 0
-                spacing: 4
 
-                Image {
-                    Layout.preferredWidth: theme.iconSize
-                    Layout.preferredHeight: theme.iconSize
-                    source: theme.iconTouch
-                    fillMode: Image.PreserveAspectFit
-                }
-
-                Text {
-                    text: inputModeHint
-                    color: theme.accent
-                    font.pixelSize: 11
-                }
-            }
 
             StatusIndicator {
                 theme: root.theme

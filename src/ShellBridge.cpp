@@ -43,10 +43,6 @@ ShellBridge::ShellBridge(QObject *parent)
     } else {
         qDebug() << "[-] Failed to register org.freedesktop.Notifications service:" << bus.lastError().message();
     }
-
-    m_watcher = new QFileSystemWatcher(this);
-    m_watcher->addPath("/tmp");
-    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &ShellBridge::handleTouchScreenFlagChanged);
 }
 
 void ShellBridge::jobControl(const QString &jobId, const QString &action)
@@ -335,16 +331,6 @@ QString ShellBridge::getStorageStatus()
 QString ShellBridge::getSystemCore()
 {
     return "Anodyne OS 1.0 (Immutable)";
-}
-
-bool ShellBridge::touchscreenDetected() const
-{
-    return false; // QFile::exists("/tmp/touchscreen_detected");
-}
-
-void ShellBridge::handleTouchScreenFlagChanged()
-{
-    emit touchscreenDetectedChanged();
 }
 
 QVariantList ShellBridge::activeAppMenus() const

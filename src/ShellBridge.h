@@ -5,7 +5,6 @@
 #include <QString>
 #include <QVariant>
 #include <QVariantList>
-#include <QFileSystemWatcher>
 
 class ShellBridge : public QObject
 {
@@ -14,13 +13,11 @@ class ShellBridge : public QObject
 
     Q_PROPERTY(QVariantList tabs READ tabs NOTIFY tabsChanged)
     Q_PROPERTY(int currentTabIndex READ currentTabIndex WRITE setCurrentTabIndex NOTIFY currentTabIndexChanged)
-    Q_PROPERTY(bool touchscreenDetected READ touchscreenDetected NOTIFY touchscreenDetectedChanged)
     Q_PROPERTY(QVariantList activeAppMenus READ activeAppMenus NOTIFY activeAppMenusChanged)
 
 public:
     explicit ShellBridge(QObject *parent = nullptr);
     QString currentMode() const;
-    bool touchscreenDetected() const;
 
     // Static helper allowing background managers to target this specific bridge instance
     static ShellBridge* instance();
@@ -74,12 +71,8 @@ signals:
 
     void tabsChanged();
     void currentTabIndexChanged();
-    void touchscreenDetectedChanged();
     void reloadTabRequested(int index);
     void activeAppMenusChanged();
-
-private slots:
-    void handleTouchScreenFlagChanged();
 
 private:
     QString m_currentMode;
@@ -92,8 +85,6 @@ private:
     // CPU telemetry tracker states
     qint64 m_prevActiveTime;
     qint64 m_prevTotalTime;
-
-    QFileSystemWatcher *m_watcher;
 };
 
 #endif // SHELLBRIDGE_H
