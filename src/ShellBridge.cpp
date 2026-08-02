@@ -100,6 +100,7 @@ void ShellBridge::setCurrentTabIndex(int index)
     if (index >= 0 && index < m_tabs.count() && m_currentTabIndex != index) {
         m_currentTabIndex = index;
         emit currentTabIndexChanged();
+        emit activeAppMenusChanged();
     }
 }
 
@@ -113,6 +114,8 @@ void ShellBridge::launchOrSwitchApp(const QString &appId, const QString &url, co
         resolvedUrl = "anodyne://settings/index.html";
     } else if (appId == "home") {
         resolvedUrl = "anodyne://homepage/index.html";
+    } else if (appId == "notepad") {
+        resolvedUrl = "anodyne://notepad/index.html";
     }
 
     // If already open, switch focus
@@ -342,4 +345,51 @@ bool ShellBridge::touchscreenDetected() const
 void ShellBridge::handleTouchScreenFlagChanged()
 {
     emit touchscreenDetectedChanged();
+}
+
+QVariantList ShellBridge::activeAppMenus() const
+{
+    if (m_currentTabIndex < 0 || m_currentTabIndex >= m_tabs.count()) return QVariantList();
+    QString activeId = m_tabs[m_currentTabIndex].toMap()["appId"].toString();
+    return m_tabMenus.value(activeId, QVariantList());
+}
+
+void ShellBridge::setAppMenus(const QString &tabId, const QString &appName, const QVariantList &categories)
+{
+    Q_UNUSED(appName);
+    m_tabMenus[tabId] = categories;
+    
+    if (m_currentTabIndex >= 0 && m_currentTabIndex < m_tabs.count()) {
+        if (m_tabs[m_currentTabIndex].toMap()["appId"].toString() == tabId) {
+            emit activeAppMenusChanged();
+        }
+    }
+}
+
+void ShellBridge::closeOtherTabs(int index)
+{
+    if (index < 0 || index >= m_tabs.count()) return;
+    
+    QVariantMap keepTab = m_tabs[index].toMap();
+    QVariantMap homeTab = m_tabs[0].toMap();
+    
+    QVariantList newTabs;
+    newTabs.append(homeTab);
+    if (keepTab["appId"].toString() != "home") {
+        newTabs.append(keepTab);
+    }
+    
+    m_tabs = newTabs;
+    emit tabsChanged();
+    
+    if (keepTab["appId"].toString() != "home") {
+        setCurrentTabIndex(1);
+    } else {
+        setCurrentTabIndex(0);
+    }
+}
+
+void ShellBridge::reloadTab(int index)
+{
+    emit reloadTabRequested(index);
 }

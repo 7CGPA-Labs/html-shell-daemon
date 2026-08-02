@@ -15,6 +15,7 @@ class ShellBridge : public QObject
     Q_PROPERTY(QVariantList tabs READ tabs NOTIFY tabsChanged)
     Q_PROPERTY(int currentTabIndex READ currentTabIndex WRITE setCurrentTabIndex NOTIFY currentTabIndexChanged)
     Q_PROPERTY(bool touchscreenDetected READ touchscreenDetected NOTIFY touchscreenDetectedChanged)
+    Q_PROPERTY(QVariantList activeAppMenus READ activeAppMenus NOTIFY activeAppMenusChanged)
 
 public:
     explicit ShellBridge(QObject *parent = nullptr);
@@ -27,6 +28,7 @@ public:
     QVariantList tabs() const;
     int currentTabIndex() const;
     void setCurrentTabIndex(int index);
+    QVariantList activeAppMenus() const;
 
 public slots:
     void executeSystemCommand(const QString &command);
@@ -52,6 +54,9 @@ public slots:
     // Tab registry management
     void launchOrSwitchApp(const QString &appId, const QString &url, const QString &title);
     void closeTab(int index);
+    void setAppMenus(const QString &tabId, const QString &appName, const QVariantList &categories);
+    void closeOtherTabs(int index);
+    void reloadTab(int index);
     
     // Internal slots used to intercept data streams from the JobManager
     void handleJobProgressUpdate(const QString &jobId, int progress);
@@ -70,6 +75,8 @@ signals:
     void tabsChanged();
     void currentTabIndexChanged();
     void touchscreenDetectedChanged();
+    void reloadTabRequested(int index);
+    void activeAppMenusChanged();
 
 private slots:
     void handleTouchScreenFlagChanged();
@@ -80,6 +87,7 @@ private:
 
     QVariantList m_tabs;
     int m_currentTabIndex;
+    QMap<QString, QVariantList> m_tabMenus;
 
     // CPU telemetry tracker states
     qint64 m_prevActiveTime;

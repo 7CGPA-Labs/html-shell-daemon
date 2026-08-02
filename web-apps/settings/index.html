@@ -3,220 +3,1185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings | Unified Control</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Settings | Anodyne OS</title>
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
-    <script src="script.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #242424;
+            color: #ffffff;
+            font-family: Cantarell, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .settings-app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* High Contrast Mode */
+        body.high-contrast {
+            background-color: #000000;
+        }
+        body.high-contrast .settings-sidebar {
+            background-color: #000000;
+            border-right: 2px solid #ffffff;
+        }
+        body.high-contrast .settings-main {
+            background-color: #000000;
+        }
+        body.high-contrast .settings-header {
+            background-color: #000000;
+            border-bottom: 2px solid #ffffff;
+        }
+        body.high-contrast .pref-group {
+            background-color: #000000;
+            border: 2px solid #ffffff;
+        }
+        body.high-contrast .pref-row {
+            border-bottom: 2px solid #ffffff;
+        }
+        body.high-contrast .category-list li {
+            border: 2px solid transparent;
+        }
+        body.high-contrast .category-list li.active {
+            background-color: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+        body.high-contrast .category-list li.active .label {
+            color: #000000;
+        }
+        body.high-contrast .btn {
+            border: 2px solid #ffffff !important;
+        }
+        body.high-contrast .dropdown, body.high-contrast .text-input {
+            border: 2px solid #ffffff;
+        }
+
+        /* Sidebar Navigation - Gnome Settings Style */
+        .settings-sidebar {
+            width: 260px;
+            background-color: #1e1e1e;
+            border-right: 1px solid #1c1c1c;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            padding: 20px 8px;
+        }
+
+        .sidebar-header {
+            padding: 0 14px 16px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 14px;
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 3px;
+            transition: background-color 0.12s, color 0.12s;
+            color: #e2e8f0;
+        }
+
+        .category-list li:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+        }
+
+        .category-list li.active {
+            background-color: #3584e4;
+            color: #ffffff;
+        }
+
+        .category-list li.active .label {
+            color: #ffffff;
+        }
+
+        .category-list li .icon {
+            font-size: 1.05rem;
+        }
+
+        .category-list li .label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Main Settings Area */
+        .settings-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: #242424;
+        }
+
+        .settings-header {
+            height: 56px;
+            border-bottom: 1px solid #1c1c1c;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            background-color: #303030;
+            flex-shrink: 0;
+        }
+
+        .settings-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .settings-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            max-width: 720px;
+            width: 100%;
+        }
+
+        .settings-section {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Gnome Style Preference Groups & Rows */
+        .pref-group-title {
+            font-size: 0.72rem;
+            color: #8a8a93;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            margin-top: 14px;
+            margin-left: 8px;
+        }
+
+        .pref-group {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .pref-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pref-row:last-child {
+            border-bottom: none;
+        }
+
+        .pref-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-right: 16px;
+        }
+
+        .pref-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .pref-subtitle {
+            font-size: 0.76rem;
+            color: #8a8a93;
+        }
+
+        .pref-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Slider, Badge, Input Control styling */
+        .slider-badge {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 140px;
+            height: 6px;
+            background: #1e1e1e;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3584e4;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            border: 2px solid #ffffff;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            background: #1c71d8;
+        }
+
+        /* Toggle Switch styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #1e1e1e;
+            transition: .2s;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #808080;
+            transition: .2s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3584e4;
+            border-color: #3584e4;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: #ffffff;
+        }
+
+        /* Dropdowns & Forms */
+        .dropdown {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .text-input {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .text-input:focus {
+            border-color: #3584e4;
+        }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-primary {
+            background-color: #3584e4;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: #1c71d8;
+        }
+
+        .btn-secondary {
+            background-color: #3a3a3a;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-secondary:hover {
+            background-color: #454545;
+        }
+
+        .btn-danger {
+            background-color: #e01b24;
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background-color: #c01c28;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
     <div class="settings-app-container">
-        <!-- Gnome style Left Sidebar Categories -->
+        <!-- Gnome Left Sidebar -->
         <aside class="settings-sidebar">
             <div class="sidebar-header">
                 <span class="header-title">Settings</span>
             </div>
             <ul class="category-list">
                 <li id="cat-display" class="active" onclick="switchCategory('display')">
-                    <span class="icon">🖥️</span>
-                    <span class="label">Sound & Display</span>
+                    <span class="icon">📺</span>
+                    <span class="label">Display & Cast</span>
                 </li>
-                <li id="cat-network" onclick="switchCategory('network')">
-                    <span class="icon">📶</span>
-                    <span class="label">Mobile Network</span>
+                <li id="cat-legibility" onclick="switchCategory('legibility')">
+                    <span class="icon">♿</span>
+                    <span class="label">Legibility & Text</span>
                 </li>
-                <li id="cat-security" onclick="switchCategory('security')">
+                <li id="cat-input" onclick="switchCategory('input')">
+                    <span class="icon">🖱️</span>
+                    <span class="label">Mouse & Keyboard</span>
+                </li>
+                <li id="cat-remote" onclick="switchCategory('remote')">
                     <span class="icon">🛡️</span>
-                    <span class="label">Security & Privacy</span>
+                    <span class="label">Remote Help</span>
                 </li>
-                <li id="cat-telemetry" onclick="switchCategory('telemetry')">
-                    <span class="icon">📊</span>
-                    <span class="label">System Telemetry</span>
+                <li id="cat-storage" onclick="switchCategory('storage')">
+                    <span class="icon">💾</span>
+                    <span class="label">Storage & Drafts</span>
                 </li>
+                 <li id="cat-web-apps" onclick="switchCategory('web-apps')">
+                     <span class="icon">🌐</span>
+                     <span class="label">Web Apps & Exts</span>
+                 </li>
             </ul>
         </aside>
 
-        <!-- Gnome style Right Content Pane -->
+        <!-- Gnome Right Content Pane -->
         <main class="settings-main">
             <header class="settings-header">
-                <h1 id="category-title">Sound & Display</h1>
+                <h1 id="category-title">Display & Cast</h1>
             </header>
 
             <div class="settings-content">
-                <!-- Section 1: Sound & Display -->
+                <!-- Section 1: Display & Cast -->
                 <section id="sec-display" class="settings-section">
+                    <div class="pref-group-title">Wireless Screen Casting</div>
                     <div class="pref-group">
                         <div class="pref-row">
                             <div class="pref-text">
-                                <span class="pref-title">Screen Brightness</span>
-                                <span class="pref-subtitle">Direct sysfs control (/sys/class/backlight)</span>
+                                <span class="pref-title">Wireless Display (Miracast)</span>
+                                <span class="pref-subtitle">Cast desktop wirelessly to smart TVs or projector</span>
                             </div>
                             <div class="pref-control">
-                                <input type="range" id="brightness-slider" min="10" max="100" value="80" class="range-slider" oninput="changeBrightness(this.value)">
-                                <span id="brightness-val" class="slider-badge">80%</span>
+                                <button class="btn btn-secondary" onclick="scanWifiDisplays()">Scan Displays</button>
                             </div>
                         </div>
-
-                        <div class="pref-row">
-                            <div class="pref-text">
-                                <span class="pref-title">System Audio Volume</span>
-                                <span class="pref-subtitle">Alsa mixer master output level</span>
+                        <div class="pref-row" id="display-list-row" style="display:none; flex-direction:column; align-items:stretch; gap:10px;">
+                            <div style="font-size: 0.8rem; color:#8a8a93; margin-bottom:4px;">Available Smart Screens:</div>
+                            <div class="pref-row" style="padding: 8px 0; border-bottom: none;">
+                                <span>📺 Living Room TV</span>
+                                <button class="btn btn-primary" style="padding: 4px 10px;" onclick="connectWifiDisplay('Living Room TV')">Connect</button>
                             </div>
-                            <div class="pref-control">
-                                <input type="range" id="volume-slider" min="0" max="100" value="70" class="range-slider" oninput="changeVolume(this.value)">
-                                <span id="volume-val" class="slider-badge">70%</span>
+                            <div class="pref-row" style="padding: 8px 0; border-bottom: none;">
+                                <span>🖥️ Conference Projector</span>
+                                <button class="btn btn-primary" style="padding: 4px 10px;" onclick="connectWifiDisplay('Conference Projector')">Connect</button>
                             </div>
                         </div>
                     </div>
-                </section>
 
-                <!-- Section 2: Mobile Network -->
-                <section id="sec-network" class="settings-section hidden">
+                    <div class="pref-group-title">Screen Fitting</div>
                     <div class="pref-group">
                         <div class="pref-row">
                             <div class="pref-text">
-                                <span class="pref-title">Mobile 4G Data</span>
-                                <span class="pref-subtitle">Connect to cellular data network</span>
+                                <span class="pref-title">Fix Cut-Off Edges (Overscan)</span>
+                                <span class="pref-subtitle">Calibrate border margins to fit TV boundaries</span>
                             </div>
                             <div class="pref-control">
-                                <label class="switch">
-                                    <input type="checkbox" id="mobile-data-toggle" checked>
-                                    <span class="slider"></span>
-                                </label>
+                                <input type="range" id="overscan-slider" min="0" max="40" value="0" class="range-slider" oninput="changeOverscan(this.value)">
+                                <span id="overscan-val" class="slider-badge">0px</span>
                             </div>
                         </div>
+                    </div>
 
+                    <div class="pref-group-title">Display Settings</div>
+                    <div class="pref-group">
                         <div class="pref-row">
                             <div class="pref-text">
-                                <span class="pref-title">Preferred Network Type</span>
-                                <span class="pref-subtitle">Select network generation preference</span>
+                                <span class="pref-title">Display Mode Switcher</span>
+                                <span class="pref-subtitle">Render independent space on cast screen or mirror</span>
                             </div>
                             <div class="pref-control">
-                                <select id="network-type-select" class="dropdown">
-                                    <option value="lte">4G LTE (Recommended)</option>
-                                    <option value="3g">3G Only</option>
-                                    <option value="2g">2G Only</option>
+                                <select id="display-mode-select" class="dropdown" onchange="changeDisplayMode(this.value)">
+                                    <option value="desktop">Desktop Mode (Independent 2nd screen)</option>
+                                    <option value="mirror">Mirror Phone Screen</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="pref-group-title">Access Point Name (APN)</div>
-                    <div class="pref-group">
-                        <div class="apn-form">
-                            <div class="form-group">
-                                <label for="apn-name">APN Name</label>
-                                <input type="text" id="apn-name" value="Anodyne Cellular Internet" class="text-input">
-                            </div>
-                            <div class="form-group">
-                                <label for="apn-address">APN Address</label>
-                                <input type="text" id="apn-address" value="internet.anodyne.apn" class="text-input">
-                            </div>
-                            <button class="btn btn-primary" onclick="saveAPN()">Save APN Profile</button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 3: Security & Privacy -->
-                <section id="sec-security" class="settings-section hidden">
+                    <div class="pref-group-title">Personalization</div>
                     <div class="pref-group">
                         <div class="pref-row">
                             <div class="pref-text">
-                                <span class="pref-title">dm-verity Verification</span>
-                                <span class="pref-subtitle">Cryptographic read-only root system integrity</span>
+                                <span class="pref-title">Wallpaper Selection</span>
+                                <span class="pref-subtitle">Choose system desktop wallpaper</span>
                             </div>
                             <div class="pref-control">
-                                <span class="badge success">VERIFIED</span>
-                            </div>
-                        </div>
-
-                        <div class="pref-row">
-                            <div class="pref-text">
-                                <span class="pref-title">TPM LUKS Partition</span>
-                                <span class="pref-subtitle">Encrypted hardware partition storage mount status</span>
-                            </div>
-                            <div class="pref-control">
-                                <span class="badge success">ACTIVE / DECRYPTED</span>
-                            </div>
-                        </div>
-
-                        <div class="pref-row">
-                            <div class="pref-text">
-                                <span class="pref-title">Host Linux Kernel</span>
-                                <span class="pref-subtitle">Operating system kernel core synthesize signature</span>
-                            </div>
-                            <div class="pref-control">
-                                <span class="badge info">6.1.0-47-amd64</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pref-group-title">Powerwash System Recovery</div>
-                    <div class="pref-group">
-                        <div class="pref-row">
-                            <div class="pref-text">
-                                <span class="pref-title">Reboot System</span>
-                                <span class="pref-subtitle">Performs standard ACPI warm system reset</span>
-                            </div>
-                            <div class="pref-control">
-                                <button class="btn btn-secondary" onclick="triggerPowerAction('reboot')">Reboot</button>
-                            </div>
-                        </div>
-
-                        <div class="pref-row">
-                            <div class="pref-text">
-                                <span class="pref-title">Powerwash Reset</span>
-                                <span class="pref-subtitle">Securely wipes writable LUKS storage to factory defaults</span>
-                            </div>
-                            <div class="pref-control">
-                                <button class="btn btn-danger" onclick="triggerPowerAction('powerwash')">Powerwash</button>
+                                <select id="wallpaper-select" class="dropdown" onchange="changeWallpaper(this.value)">
+                                    <option value="dark">Aurora Dark (Default)</option>
+                                    <option value="light">Classic Light</option>
+                                    <option value="contrast">High-Contrast Slate</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Section 4: System Telemetry -->
-                <section id="sec-telemetry" class="settings-section hidden">
+                <!-- Section 2: Legibility & Text -->
+                <section id="sec-legibility" class="settings-section hidden">
+                    <div class="pref-group-title">OS Size & Zoom</div>
                     <div class="pref-group">
                         <div class="pref-row">
                             <div class="pref-text">
-                                <span class="pref-title">zRAM Partition Status</span>
-                                <span class="pref-subtitle">Size: <span id="zram-size-val">--</span> | Algo: <span id="zram-algo-val">--</span> | Swappiness: <span id="swappiness-val">--</span></span>
+                                <span class="pref-title">Desktop Sizing</span>
+                                <span class="pref-subtitle">Scale text sizes and panels globally</span>
                             </div>
                             <div class="pref-control">
-                                <span class="badge info">zRAM SWAP</span>
-                            </div>
-                        </div>
-
-                        <div class="pref-row">
-                            <div class="pref-text">
-                                <span class="pref-title">CPU Processing Load</span>
-                                <span class="pref-subtitle">Live kernel CPU tick utilization status</span>
-                            </div>
-                            <div class="pref-control">
-                                <span id="cpu-load" class="badge info">--</span>
-                            </div>
-                        </div>
-
-                        <div class="pref-row">
-                            <div class="pref-text">
-                                <span class="pref-title">Cellular Signal Strength</span>
-                                <span class="pref-subtitle">oFono dbm signal telemetry mapping</span>
-                            </div>
-                            <div class="pref-control">
-                                <span id="ofono-signal" class="badge info">-82 dBm (Good)</span>
+                                <select id="scale-select" class="dropdown" onchange="changeScale(this.value)">
+                                    <option value="1.0">Small (100%)</option>
+                                    <option value="1.25">Medium (125%)</option>
+                                    <option value="1.5">Large (150%)</option>
+                                    <option value="2.0">Extra Large (200%)</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="pref-group-title">oFono Cellular Telemetry Stream</div>
+                    <div class="pref-group-title">Visual Enhancements</div>
                     <div class="pref-group">
-                        <div id="telemetry-logs" class="telemetry-logs-box">
-                            <!-- Populated dynamically via JS -->
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">High Contrast Mode</span>
+                                <span class="pref-subtitle">Bold border boundaries for low-vision reading</span>
+                            </div>
+                            <div class="pref-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="high-contrast-toggle" onchange="toggleHighContrast(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="pref-group-title">Mouse Pointer Customization</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Cursor Visual Color</span>
+                                <span class="pref-subtitle">Pointer styling color preset</span>
+                            </div>
+                            <div class="pref-control">
+                                <select id="cursor-color" class="dropdown" onchange="changeCursorStyle()">
+                                    <option value="white">White (Default)</option>
+                                    <option value="black">Black</option>
+                                    <option value="yellow">Yellow</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Cursor Scaling Size</span>
+                                <span class="pref-subtitle">Scale mouse pointer pointer arrow width</span>
+                            </div>
+                            <div class="pref-control">
+                                <select id="cursor-size" class="dropdown" onchange="changeCursorStyle()">
+                                    <option value="normal">Normal</option>
+                                    <option value="large">Large</option>
+                                    <option value="extra large">Extra Large</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Speech Assistance</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Sound Alerts (Text-to-Speech)</span>
+                                <span class="pref-subtitle">Read active tab sessions aloud when switched</span>
+                            </div>
+                            <div class="pref-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="sound-alerts-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Mouse & Keyboard -->
+                <section id="sec-input" class="settings-section hidden">
+                    <div class="pref-group-title">Trackpad & Pointer</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Mouse Pointer Speed</span>
+                                <span class="pref-subtitle">Pointer velocity delta sensitivity</span>
+                            </div>
+                            <div class="pref-control">
+                                <input type="range" id="pointer-speed-slider" min="5" max="25" value="10" class="range-slider" oninput="changePointerSpeed(this.value)">
+                                <span id="pointer-speed-val" class="slider-badge">1.0x</span>
+                            </div>
+                        </div>
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Scroll Direction</span>
+                                <span class="pref-subtitle">Natural (content moves with finger) vs Standard</span>
+                            </div>
+                            <div class="pref-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="scroll-direction-toggle" checked onchange="changeScrollDirection(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">System Shortcuts</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Spotlight Shortcut Trigger</span>
+                                <span class="pref-subtitle">Define keystroke pattern to toggle Intent Launcher</span>
+                            </div>
+                            <div class="pref-control">
+                                <select id="spotlight-shortcut-select" class="dropdown">
+                                    <option value="meta_space">Cmd/Ctrl + Space (Default)</option>
+                                    <option value="alt_space">Alt + Space</option>
+                                    <option value="meta_only">Win / Command key alone</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Typing Options</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">On-Screen Keyboard</span>
+                                <span class="pref-subtitle">Auto-show virtual keyboard when focusing text edits</span>
+                            </div>
+                            <div class="pref-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="keyboard-auto-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Remote Help -->
+                <section id="sec-remote" class="settings-section hidden">
+                    <div class="pref-group-title">IT Screen Sharing</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Get Remote Assistance</span>
+                                <span class="pref-subtitle">Get secure help by sharing screen via 6-digit PIN</span>
+                            </div>
+                            <div class="pref-control">
+                                <button class="btn btn-secondary" onclick="triggerHelpPin()">Get Code</button>
+                            </div>
+                        </div>
+                        <div class="pref-row" id="remote-pin-row" style="display:none; background:rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.2);">
+                            <div class="pref-text">
+                                <span class="pref-title" style="color:#ef4444;">Active Remote Session PIN</span>
+                                <span class="pref-subtitle" id="remote-pin-val" style="font-size:1.5rem; font-weight:bold; color:white; margin-top:8px;">000 000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Unattended Remote Access</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Enable Unattended Access</span>
+                                <span class="pref-subtitle">Remote into this DeX desktop securely from home</span>
+                            </div>
+                            <div class="pref-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="unattended-toggle" onchange="toggleUnattended(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="pref-row" id="unattended-pass-row" style="display:none; flex-direction:column; align-items:stretch; gap:10px;">
+                            <div class="form-group">
+                                <label for="unattended-password">Security Password</label>
+                                <input type="password" id="unattended-password" placeholder="Enter secure password" class="text-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Active Connections</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Active Support Session</span>
+                                <span class="pref-subtitle" id="connection-status-label">No active connections</span>
+                            </div>
+                            <div class="pref-control">
+                                <button class="btn btn-danger" id="disconnect-remote-btn" style="display:none;" onclick="disconnectRemoteSession()">Disconnect Session</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 5: Storage & Drafts -->
+                <section id="sec-storage" class="settings-section hidden">
+                    <div class="pref-group-title">Draft Security</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Auto-Save Protection</span>
+                                <span class="pref-subtitle">Automatically backup text drafts and page forms to SQLite-WASM every 5 seconds</span>
+                            </div>
+                            <div class="pref-control">
+                                <label class="switch">
+                                    <input type="checkbox" id="autosave-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Tab Resource Management</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Tab Memory Saver Mode</span>
+                                <span class="pref-subtitle">Balance RAM footprint vs tab load speeds</span>
+                            </div>
+                            <div class="pref-control">
+                                <select id="memory-saver-select" class="dropdown">
+                                    <option value="balanced">Balanced (Suspend background tabs after 15 mins)</option>
+                                    <option value="performance">Performance (Keep all tabs loaded in RAM)</option>
+                                    <option value="saver">Aggressive Saver (Serialize background tabs immediately)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Browser Health & Maintenance</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">One-Tap Cleanup ("Free Up Space")</span>
+                                <span class="pref-subtitle">Purge temporary cache, storage, and cookies to keep Anodyne Desktop running fast</span>
+                            </div>
+                            <div class="pref-control">
+                                <button class="btn btn-danger" style="background:#dc2626; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;" onclick="triggerCacheCleanup()">Clean System Cache</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 6: Default Web Apps -->
+                <section id="sec-web-apps" class="settings-section hidden">
+                    <div class="pref-group-title">Protocol Mappings</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">Default Email Service (mailto)</span>
+                                <span class="pref-subtitle">Direct mail links mapping choice</span>
+                            </div>
+                            <div class="pref-control">
+                                <select id="email-default-select" class="dropdown">
+                                    <option value="gmail">Web Gmail (Recommended)</option>
+                                    <option value="outlook">Outlook PWA</option>
+                                    <option value="custom">Custom Webmail Server</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">File Type Handlers</div>
+                    <div class="pref-group">
+                        <div class="pref-row">
+                            <div class="pref-text">
+                                <span class="pref-title">PDF Document Reader</span>
+                                <span class="pref-subtitle">Default PDF contract and document reader engine</span>
+                            </div>
+                            <div class="pref-control">
+                                <select id="pdf-default-select" class="dropdown">
+                                    <option value="wasm">WASM PDFium Viewer (On-Device)</option>
+                                    <option value="external">External Browser Tab</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Installed Web Apps (PWAs)</div>
+                    <div class="pref-group">
+                        <div id="installed-pwas-list" style="display: flex; flex-direction: column; gap: 4px; padding: 6px 0;">
+                            <!-- Dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Install New Web App (PWA)</div>
+                    <div class="pref-group" style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="install-pwa-name" placeholder="App Name (e.g. Calculator)" class="text-input" style="width: 100%; box-sizing: border-box;">
+                        <input type="text" id="install-pwa-url" placeholder="App URL (https://...)" class="text-input" style="width: 100%; box-sizing: border-box;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="install-pwa-category" class="dropdown" style="flex: 1;">
+                                <option value="Accessories">Accessories</option>
+                                <option value="Internet">Internet</option>
+                                <option value="System Tools">System Tools</option>
+                                <option value="Preferences">Preferences</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="submitPwaInstall()" style="padding: 8px 16px;">Install App</button>
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Installed Browser Extensions</div>
+                    <div class="pref-group">
+                        <div id="installed-extensions-list" style="display: flex; flex-direction: column; gap: 4px; padding: 6px 0;">
+                            <!-- Dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <div class="pref-group-title">Install New Extension</div>
+                    <div class="pref-group" style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="install-ext-name" placeholder="Extension Name (e.g. Dark Mode)" class="text-input" style="width: 100%; box-sizing: border-box;">
+                        <textarea id="install-ext-script" placeholder="Extension JavaScript code..." class="text-input" style="width: 100%; height: 80px; box-sizing: border-box; font-family: monospace; font-size: 0.8rem; padding: 8px; border-radius: 6px; background: #0c0c14; color: white; border: 1px solid #2a2a3a;"></textarea>
+                        <button class="btn btn-primary" onclick="submitExtensionInstall()" style="padding: 8px 16px; align-self: flex-end;">Install Extension</button>
                     </div>
                 </section>
             </div>
         </main>
     </div>
+
+    <script>
+        (function() {
+            var messagePort = null;
+            var pendingRequests = [];
+            var callbackMap = {};
+
+            window.addEventListener('message', function(e) {
+                if (e.data === 'init-ipc' && e.ports && e.ports.length > 0) {
+                    messagePort = e.ports[0];
+                    messagePort.onmessage = function(event) {
+                        // Secure WebMessagePort messages
+                    };
+                    
+                    while (pendingRequests.length > 0) {
+                        var req = pendingRequests.shift();
+                        messagePort.postMessage(JSON.stringify(req));
+                    }
+                }
+            });
+
+            window.addEventListener('anodyneIpcResponse', function(e) {
+                var detail = e.detail;
+                if (detail && callbackMap[detail.id]) {
+                    callbackMap[detail.id](detail.result);
+                    delete callbackMap[detail.id];
+                }
+            });
+
+            window.anodyneIPC = {
+                send: function(action) {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    if (window.sysContext) {
+                        if (typeof window.sysContext[action] === 'function') {
+                            var res = window.sysContext[action].apply(window.sysContext, args);
+                            return Promise.resolve(res);
+                        } else if (action === "logWebEvent") {
+                            window.sysContext.logWebEvent(args[0]);
+                            return Promise.resolve("success");
+                        } else if (action === "executeSystemCommand") {
+                            window.sysContext.executeSystemCommand(args[0]);
+                            return Promise.resolve("success");
+                        } else if (action === "jobControl") {
+                            window.sysContext.jobControl(args[0], args[1]);
+                            return Promise.resolve("success");
+                        } else if (action === "launchAppTab") {
+                            window.sysContext.launchOrSwitchApp(args[0], args[1], args[2]);
+                            return Promise.resolve("success");
+                        } else if (action === "getGpsLocation") {
+                            return Promise.resolve("Lubuntu Host (Local)");
+                        } else if (action === "getAccessPin") {
+                            return Promise.resolve("8888");
+                        } else if (action === "registerDynamicPwa" || action === "registerDynamicExtension" || action === "unregisterDynamicPwa" || action === "unregisterDynamicExtension" || action === "getDynamicPwasJson" || action === "getDynamicExtensionsJson") {
+                            return Promise.resolve("[]");
+                        }
+                    }
+                    var id = 'msg_' + Math.random().toString(36).substr(2, 9);
+                    return new Promise(function(resolve) {
+                        callbackMap[id] = resolve;
+                        var req = { id: id, action: action, args: args };
+                        if (messagePort) {
+                            messagePort.postMessage(JSON.stringify(req));
+                        } else {
+                            pendingRequests.push(req);
+                        }
+                    });
+                }
+            };
+        })();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initializeAnodyneIPCBridge();
+            setupSettingListeners();
+            switchCategory('display');
+            loadDynamicAppsAndExtensions();
+        });
+
+        function initializeAnodyneIPCBridge() {
+            if (typeof qt !== 'undefined' && qt.webChannelTransport) {
+                new QWebChannel(qt.webChannelTransport, function(channel) {
+                    window.sysContext = channel.objects.sysContext;
+                    setupBridgeCallbacks();
+                });
+            } else {
+                setupBridgeCallbacks();
+            }
+        }
+
+        function setupBridgeCallbacks() {
+            console.log("Bridge initialized using WebMessagePort IPC.");
+            window.anodyneIPC.send("setAppMenus", "settings", "Settings", [
+                {
+                    category: "File",
+                    items: ["Close Settings"]
+                },
+                {
+                    category: "View",
+                    items: ["Display", "Text & Legibility", "Input Controls", "Privacy", "System Diagnostics"]
+                }
+            ]);
+            loadHostSystemStats();
+        }
+
+        function loadHostSystemStats() {
+            window.anodyneIPC.send("getAccessPin").then(function(pin) {
+                if (pin) {
+                    document.getElementById("remote-pin-val").textContent = pin;
+                }
+            });
+        }
+
+        function switchCategory(cat) {
+            const sections = document.querySelectorAll(".settings-section");
+            sections.forEach(sec => sec.classList.add("hidden"));
+
+            const activeSec = document.getElementById("sec-" + cat);
+            if (activeSec) {
+                activeSec.classList.remove("hidden");
+            }
+
+            const titles = {
+                'display': 'Display & Cast',
+                'legibility': 'Legibility & Text',
+                'input': 'Mouse & Keyboard',
+                'remote': 'Remote Help',
+                'storage': 'Storage & Drafts',
+                'web-apps': 'Web Apps & Extensions'
+            };
+            document.getElementById("category-title").textContent = titles[cat] || 'Settings';
+
+            const listItems = document.querySelectorAll(".category-list li");
+            listItems.forEach(li => li.classList.remove("active"));
+            
+            const activeLi = document.getElementById("cat-" + cat);
+            if (activeLi) {
+                activeLi.classList.add("active");
+            }
+
+            loadHostSystemStats();
+            if (cat === 'web-apps') {
+                loadDynamicAppsAndExtensions();
+            }
+        }
+
+        function setupSettingListeners() {
+            const cachedOverscan = localStorage.getItem("overscan") || 0;
+            const overscanSlider = document.getElementById("overscan-slider");
+            if (overscanSlider) {
+                overscanSlider.value = cachedOverscan;
+                document.getElementById("overscan-val").textContent = cachedOverscan + "px";
+            }
+
+            const cachedSpeed = localStorage.getItem("pointerSpeed") || 10;
+            const speedSlider = document.getElementById("pointer-speed-slider");
+            if (speedSlider) {
+                speedSlider.value = cachedSpeed;
+                document.getElementById("pointer-speed-val").textContent = (cachedSpeed / 10).toFixed(1) + "x";
+            }
+        }
+
+        // Wireless displays simulation triggers
+        function scanWifiDisplays() {
+            const row = document.getElementById("display-list-row");
+            row.style.display = row.style.display === "none" ? "flex" : "none";
+        }
+
+        function connectWifiDisplay(name) {
+            alert(`Connecting wirelessly to: ${name}...`);
+        }
+
+        function changeOverscan(val) {
+            document.getElementById("overscan-val").textContent = val + "px";
+            localStorage.setItem("overscan", val);
+            window.anodyneIPC.send("setOverscanPadding", parseInt(val, 10));
+        }
+
+        function changeDisplayMode(mode) {
+            window.anodyneIPC.send("logWebEvent", `Settings: Changed display mode to ${mode}`);
+        }
+
+        function changeWallpaper(wallpaper) {
+            window.anodyneIPC.send("logWebEvent", `Settings: Updated desktop wallpaper theme to ${wallpaper}`);
+        }
+
+        function changeScale(scaleStr) {
+            const scale = parseFloat(scaleStr);
+            window.anodyneIPC.send("setUiScale", scale);
+        }
+
+        function toggleHighContrast(checked) {
+            if (checked) {
+                document.body.classList.add("high-contrast");
+            } else {
+                document.body.classList.remove("high-contrast");
+            }
+            window.anodyneIPC.send("logWebEvent", `Settings: Toggle high contrast mode to ${checked}`);
+        }
+
+        function changeCursorStyle() {
+            const color = document.getElementById("cursor-color").value;
+            const size = document.getElementById("cursor-size").value;
+            window.anodyneIPC.send("setCursorStyle", color, size);
+        }
+
+        function changePointerSpeed(val) {
+            const factor = (val / 10).toFixed(1);
+            document.getElementById("pointer-speed-val").textContent = factor + "x";
+            localStorage.setItem("pointerSpeed", val);
+            window.anodyneIPC.send("setPointerSpeed", parseFloat(factor));
+        }
+
+        function changeScrollDirection(natural) {
+            window.anodyneIPC.send("setScrollDirectionNatural", natural);
+        }
+
+        // Help triggers
+        function triggerHelpPin() {
+            const row = document.getElementById("remote-pin-row");
+            row.style.display = "flex";
+            loadHostSystemStats();
+        }
+
+        function toggleUnattended(checked) {
+            const row = document.getElementById("unattended-pass-row");
+            row.style.display = checked ? "flex" : "none";
+        }
+
+        function disconnectRemoteSession() {
+            window.anodyneIPC.send("stopRemoteControlSession");
+            document.getElementById("remote-pin-row").style.display = "none";
+            document.getElementById("disconnect-remote-btn").style.display = "none";
+            document.getElementById("connection-status-label").textContent = "No active connections";
+        }
+
+        function triggerCacheCleanup() {
+            window.anodyneIPC.send("clearSystemStorage").then(function() {
+                alert("System temporary databases and cache cleared successfully!");
+            });
+        }
+
+        function loadDynamicAppsAndExtensions() {
+            // Render PWAs list
+            const pwasList = document.getElementById("installed-pwas-list");
+            if (pwasList) {
+                pwasList.innerHTML = "";
+                window.anodyneIPC.send("getDynamicPwasJson").then(function(jsonStr) {
+                    try {
+                        const pwas = JSON.parse(jsonStr || "[]");
+                        if (pwas.length === 0) {
+                            pwasList.innerHTML = '<div style="font-size:0.85rem; color:#64748b; padding:4px 14px;">No custom PWAs installed</div>';
+                        } else {
+                            pwas.forEach(pwa => {
+                                const row = document.createElement("div");
+                                row.className = "pref-row";
+                                row.style.borderBottom = "none";
+                                row.style.padding = "6px 14px";
+                                row.innerHTML = `
+                                    <div class="pref-text">
+                                        <span class="pref-title">${pwa.title}</span>
+                                        <span class="pref-subtitle">${pwa.url} (${pwa.category})</span>
+                                    </div>
+                                    <div class="pref-control">
+                                        <button class="btn btn-danger" style="background:#dc2626; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;" onclick="uninstallPwa('${pwa.id}')">Uninstall</button>
+                                    </div>
+                                `;
+                                pwasList.appendChild(row);
+                            });
+                        }
+                    } catch(e) { console.error(e); }
+                });
+            }
+
+            // Render Extensions list
+            const extsList = document.getElementById("installed-extensions-list");
+            if (extsList) {
+                extsList.innerHTML = "";
+                window.anodyneIPC.send("getDynamicExtensionsJson").then(function(jsonStr) {
+                    try {
+                        const exts = JSON.parse(jsonStr || "[]");
+                        if (exts.length === 0) {
+                            extsList.innerHTML = '<div style="font-size:0.85rem; color:#64748b; padding:4px 14px;">No custom extensions installed</div>';
+                        } else {
+                            exts.forEach(ext => {
+                                const row = document.createElement("div");
+                                row.className = "pref-row";
+                                row.style.borderBottom = "none";
+                                row.style.padding = "6px 14px";
+                                row.innerHTML = `
+                                    <div class="pref-text">
+                                        <span class="pref-title">🧩 ${ext.name}</span>
+                                    </div>
+                                    <div class="pref-control">
+                                        <button class="btn btn-danger" style="background:#dc2626; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;" onclick="uninstallExtension('${ext.name}')">Remove</button>
+                                    </div>
+                                `;
+                                extsList.appendChild(row);
+                            });
+                        }
+                    } catch(e) { console.error(e); }
+                });
+            }
+        }
+
+        function submitPwaInstall() {
+            const name = document.getElementById("install-pwa-name").value.trim();
+            const url = document.getElementById("install-pwa-url").value.trim();
+            const category = document.getElementById("install-pwa-category").value;
+            if (!name || !url) {
+                alert("Please fill in both Name and URL.");
+                return;
+            }
+            const id = "pwa_" + Date.now();
+            window.anodyneIPC.send("registerDynamicPwa", id, name, url, category).then(function() {
+                document.getElementById("install-pwa-name").value = "";
+                document.getElementById("install-pwa-url").value = "";
+                loadDynamicAppsAndExtensions();
+                alert(`Successfully installed PWA: ${name}`);
+            });
+        }
+
+        function submitExtensionInstall() {
+            const name = document.getElementById("install-ext-name").value.trim();
+            const script = document.getElementById("install-ext-script").value.trim();
+            if (!name || !script) {
+                alert("Please fill in both Name and Script.");
+                return;
+            }
+            window.anodyneIPC.send("registerDynamicExtension", name, script).then(function() {
+                document.getElementById("install-ext-name").value = "";
+                document.getElementById("install-ext-script").value = "";
+                loadDynamicAppsAndExtensions();
+                alert(`Successfully installed Extension: ${name}`);
+            });
+        }
+
+        function uninstallPwa(id) {
+            if (confirm("Are you sure you want to uninstall this PWA?")) {
+                window.anodyneIPC.send("unregisterDynamicPwa", id).then(function() {
+                    loadDynamicAppsAndExtensions();
+                });
+            }
+        }
+
+        function uninstallExtension(name) {
+            if (confirm(`Are you sure you want to remove extension: ${name}?`)) {
+                window.anodyneIPC.send("unregisterDynamicExtension", name).then(function() {
+                    loadDynamicAppsAndExtensions();
+                });
+            }
+        }
+
+        // Handle TopBar dynamic menu triggers
+        window.onAnodyneMenuAction = function(category, item) {
+            if (category === "View") {
+                if (item === "Display") switchCategory("display");
+                else if (item === "Text & Legibility") switchCategory("legibility");
+                else if (item === "Input Controls") switchCategory("input");
+                else if (item === "Privacy") switchCategory("privacy");
+                else if (item === "System Diagnostics") switchCategory("diagnostics");
+            }
+        };
+    </script>
 </body>
 </html>

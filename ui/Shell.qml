@@ -59,6 +59,13 @@ Window {
             topBar.statusBadgeVisible = true
             badgeTimer.restart()
         }
+
+        function onReloadTabRequested(index) {
+            var webView = canvasContainer.children[index];
+            if (webView && webView.reload) {
+                webView.reload();
+            }
+        }
     }
 
     Timer {
@@ -92,6 +99,12 @@ Window {
         onLockRequested: {
             root.isLocked = true
         }
+        onMenuActionTriggered: {
+            var activeWebView = canvasContainer.children[currentTabIndex];
+            if (activeWebView && activeWebView.runJavaScript) {
+                activeWebView.runJavaScript("if (typeof window.onAnodyneMenuAction === 'function') { window.onAnodyneMenuAction('" + category + "', '" + item + "'); }");
+            }
+        }
     }
 
     // 3. Tabbed Multitasking Bar
@@ -124,9 +137,15 @@ Window {
                 border.width: 1
 
                 MouseArea {
+                    id: tabMa
                     anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     onClicked: {
-                        nativeSystemBridge.currentTabIndex = index
+                        if (mouse.button === Qt.RightButton) {
+                            tabContextMenu.showMenu(tabMa, mouse.x, mouse.y, index)
+                        } else {
+                            nativeSystemBridge.currentTabIndex = index
+                        }
                     }
                 }
 
@@ -316,7 +335,20 @@ Window {
 
     function closeTab(index) {
         autoLockTimer.restart();
-        nativeSystemBridge.closeTab(index);
+        var webView = canvasContainer.children[index];
+        if (webView && webView.runJavaScript) {
+            var checkJs = "(function() { var dirty = false; document.querySelectorAll('input, textarea').forEach(function(el) { if (el.value && el.value.trim() !== '' && el.type !== 'submit' && el.type !== 'button' && el.type !== 'hidden') { dirty = true; } }); return dirty; })()";
+            webView.runJavaScript(checkJs, function(result) {
+                if (result) {
+                    dirtyConfirmDialog.targetIndex = index;
+                    dirtyConfirmDialog.open();
+                } else {
+                    nativeSystemBridge.closeTab(index);
+                }
+            });
+        } else {
+            nativeSystemBridge.closeTab(index);
+        }
     }
 
     function routeCommand(input) {
@@ -561,6 +593,141 @@ Window {
         repeat: false
         onTriggered: {
             root.isLocked = true
+        }
+    }
+
+    Menu {
+        id: tabContextMenu
+
+        property int targetTabIndex: -1
+
+        background: Rectangle {
+            color: "#12121a"
+            border.color: "#2a2a3a"
+            border.width: 1
+            radius: 6
+        }
+
+        function showMenu(parentItem, mx, my, index) {
+            targetTabIndex = index
+            popup(parentItem, mx, my)
+        }
+
+        MenuItem {
+            text: "🔄 Reload Tab"
+
+            contentItem: Text {
+                text: parent.text
+                color: parent.hovered ? "#ffffff" : "#e2e8f0"
+                font.pixelSize: 11
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: parent.hovered ? "#3584e4" : "transparent"
+                radius: 4
+            }
+
+            onTriggered: {
+                nativeSystemBridge.reloadTab(tabContextMenu.targetTabIndex)
+            }
+        }
+
+        MenuItem {
+            text: "👥 Duplicate Tab"
+
+            contentItem: Text {
+                text: parent.text
+                color: parent.hovered ? "#ffffff" : "#e2e8f0"
+                font.pixelSize: 11
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: parent.hovered ? "#3584e4" : "transparent"
+                radius: 4
+            }
+
+            onTriggered: {
+                var tabData = nativeSystemBridge.tabs[tabContextMenu.targetTabIndex];
+                var dupId = "web_" + Date.now();
+                nativeSystemBridge.launchOrSwitchApp(dupId, tabData.url, tabData.title);
+            }
+        }
+
+        MenuItem {
+            text: "❌ Close Tab"
+            visible: tabContextMenu.targetTabIndex !== 0
+
+            contentItem: Text {
+                text: parent.text
+                color: parent.hovered ? "#ffffff" : "#e2e8f0"
+                font.pixelSize: 11
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: parent.hovered ? "#3584e4" : "transparent"
+                radius: 4
+            }
+
+            onTriggered: {
+                closeTab(tabContextMenu.targetTabIndex)
+            }
+        }
+
+        MenuItem {
+            text: "🧹 Close Other Tabs"
+
+            contentItem: Text {
+                text: parent.text
+                color: parent.hovered ? "#ffffff" : "#e2e8f0"
+                font.pixelSize: 11
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: parent.hovered ? "#3584e4" : "transparent"
+                radius: 4
+            }
+
+            onTriggered: {
+                nativeSystemBridge.closeOtherTabs(tabContextMenu.targetTabIndex)
+            }
+        }
+    }
+
+    Dialog {
+        id: dirtyConfirmDialog
+        title: qsTr("Unsaved Changes")
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+
+        anchors.centerIn: parent
+
+        property int targetIndex: -1
+
+        background: Rectangle {
+            color: "#1e1e1e"
+            border.color: "#333333"
+            radius: 8
+        }
+
+        header: Label {
+            text: dirtyConfirmDialog.title
+            color: "#ffffff"
+            font.pixelSize: 14
+            font.weight: Font.Bold
+            padding: 12
+        }
+
+        Label {
+            text: qsTr("You have unsaved changes in this tab. Close anyway?")
+            color: "#e2e8f0"
+            font.pixelSize: 12
+            padding: 12
+        }
+
+        onAccepted: {
+            if (targetIndex !== -1) {
+                nativeSystemBridge.closeTab(targetIndex);
+            }
         }
     }
 }
